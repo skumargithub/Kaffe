@@ -16,8 +16,8 @@ ENGINE_OBJECTS=\
 		labels$(OBJEXT) \
 		registers$(OBJEXT) \
 		slots$(OBJEXT) \
-		machine$(OBJEXT) \
+		machine-jit$(OBJEXT) \
 		seq$(OBJEXT)
 
 funcs.o:	funcs.c jit.def
-machine.o:	machine.c kaffe.def
+machine.o:	machine-jit.c kaffe.jit.def
