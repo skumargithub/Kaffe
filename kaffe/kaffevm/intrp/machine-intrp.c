@@ -107,21 +107,17 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 {
 	char* sig = meth->signature->data;
 	int i = 0;
-	int s = 0;
 
 	/* If this method isn't static, we must insert the object as
 	 * an argument.
  	 */
 	if ((meth->accflags & ACC_STATIC) == 0) {
 		call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
-		s += call->callsize[i];
-		call->calltype[i] = 'L';
 		i++;
 	}
 
 	sig++;	/* Skip leading '(' */
 	for (; *sig != ')'; i++, sig++) {
-		call->calltype[i] = *sig;
 		switch (*sig) {
 		case 'I':
 		case 'Z':
@@ -140,7 +136,6 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 			break;
 
 		case '[':
-			call->calltype[i] = 'L';	/* Looks like an object */
 			call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
 			while (*sig == '[') {
 				sig++;
@@ -160,28 +155,10 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 		default:
 			ABORT();
 		}
-		s += call->callsize[i];
-	}
-	sig++;	/* Skip trailing ')' */
-
-	/* Return info */
-	call->rettype = *sig;
-	if (*sig == 'L' || *sig == '[') {
-		call->retsize = PTR_TYPE_SIZE / SIZEOF_INT;
-	}
-	else if (*sig == 'V') {
-		call->retsize = 0;
-	}
-	else if (*sig == 'D' || *sig == 'J') {
-		call->retsize = 2;
-	}
-	else {
-		call->retsize = 1;
 	}
 
 	/* Call info and arguments */
 	call->nrargs = i;
-	call->argsize = s;
 }
 
 void
@@ -373,6 +350,9 @@ case INVOKEVIRTUAL:
             cM.args = (jvalue*) (sp + 1);
             cM.ret = (jvalue*) retval;
             cM.function = cinfo.method->ncode;
+            cM.rettype = cinfo.rettype;
+            cM.retsize = cinfo.out;
+            cM.argsize = cinfo.in;
 
             intrp_to_jit(cinfo.method, &cM);
 
@@ -436,6 +416,9 @@ case INVOKESPECIAL:
             cM.args = (jvalue*) (sp + 1);
             cM.ret = (jvalue*) retval;
             cM.function = cinfo.method->ncode;
+            cM.rettype = cinfo.rettype;
+            cM.retsize = cinfo.out;
+            cM.argsize = cinfo.in;
 
             intrp_to_jit(cinfo.method, &cM);
 
@@ -491,6 +474,9 @@ case INVOKESTATIC:
             cM.args = (jvalue*) (sp + 1);
             cM.ret = (jvalue*) retval;
             cM.function = cinfo.method->ncode;
+            cM.rettype = cinfo.rettype;
+            cM.retsize = cinfo.out;
+            cM.argsize = cinfo.in;
 
             intrp_to_jit(cinfo.method, &cM);
 
@@ -558,6 +544,9 @@ case INVOKEINTERFACE:
             cM.args = (jvalue*) (sp + 1);
             cM.ret = (jvalue*) retval;
             cM.function = cinfo.method->ncode;
+            cM.rettype = cinfo.rettype;
+            cM.retsize = cinfo.out;
+            cM.argsize = cinfo.in;
 
             intrp_to_jit(cinfo.method, &cM);
 
