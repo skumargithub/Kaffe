@@ -12,6 +12,8 @@
 #define TRANSLATOR
 #endif
 
+#undef INTERPRETER
+
 #include "config.h"
 #include "config-std.h"
 #include "config-mem.h"
