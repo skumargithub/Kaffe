@@ -4931,7 +4931,7 @@ make_output="\
 Makefile \
 config/Makefile include/Makefile kaffe/Makefile test/Makefile \
 libraries/Makefile \
-kaffe/kaffevm/Makefile kaffe/kaffe/Makefile kaffe/kaffeh/Makefile \
+kaffe/kaffevm/Makefile kaffe/kaffe/Makefile \
 kaffe/man/Makefile kaffe/scripts/Makefile \
 "
 
