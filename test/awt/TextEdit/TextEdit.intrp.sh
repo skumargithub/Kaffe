@@ -1,1 +1,1 @@
-Kaffe.jit -jar TextEdit.jar
+Kaffe.intrp -disableJIT -jar TextEdit.jar
