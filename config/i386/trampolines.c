@@ -36,7 +36,9 @@ TRAMPOLINE_FUNCTION()
 asm(
 	START_ASM_FUNC() C_FUNC_NAME(i386_do_fixup_trampoline) "\n"
 C_FUNC_NAME(i386_do_fixup_trampoline) ":			\n
+    pushl   %eax                                        \n
 	call	" C_FUNC_NAME(soft_fixup_trampoline) "		\n
+	popl	%eax						\n
 	popl	%ecx						\n
 	jmp	*%eax"
 	END_ASM_FUNC()
@@ -51,7 +53,9 @@ C_FUNC_NAME(i386_do_fixup_trampoline) ":			\n
 i386_dft1:							\n
 	popl	%ebx						\n
 	addl	$_GLOBAL_OFFSET_TABLE_+[.-i386_dft1],%ebx	\n
+    pushl   %eax                                        \n
 	call	" C_FUNC_NAME(soft_fixup_trampoline) "@PLT	\n
+	popl	%eax						\n
 	popl	%ecx						\n
 	jmp	*%eax"
 	END_ASM_FUNC()
