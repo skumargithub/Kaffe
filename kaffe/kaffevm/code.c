@@ -52,21 +52,30 @@ DBG(CODEATTR,
 	readu2(&elen, fp);
 DBG(CODEATTR,	dprintf("Exception table length = %d\n", elen);	)
 	if (elen > 0) {
-		c.exception_table = gc_malloc(sizeof(jexception) + ((elen - 1) * sizeof(jexceptionEntry)), GC_ALLOC_EXCEPTIONTABLE);
+		c.exception_table = gc_malloc(2 * (sizeof(jexception) + ((elen - 1) * sizeof(jexceptionEntry))), GC_ALLOC_EXCEPTIONTABLE);
+        c.Jexception_table = (struct _jexception*)
+                                &c.exception_table->entry[elen];
+        c.Jexception_table->length =
 		c.exception_table->length = elen;
 		for (i = 0; i < elen; i++) {
 			readu2(&i2, fp);
+			c.Jexception_table->entry[i].start_pc =
 			c.exception_table->entry[i].start_pc = i2;
 			readu2(&i2, fp);
+			c.Jexception_table->entry[i].end_pc =
 			c.exception_table->entry[i].end_pc = i2;
 			readu2(&i2, fp);
+			c.Jexception_table->entry[i].handler_pc =
 			c.exception_table->entry[i].handler_pc = i2;
 			readu2(&i2, fp);
+			c.Jexception_table->entry[i].catch_idx =
 			c.exception_table->entry[i].catch_idx = i2;
+			c.Jexception_table->entry[i].catch_type =
 			c.exception_table->entry[i].catch_type = NULL;
 		}
 	}
 	else {
+		c.Jexception_table =
 		c.exception_table = 0;
 	}
 	GC_WRITE(m, c.code);

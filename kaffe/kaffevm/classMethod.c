@@ -422,6 +422,7 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
 	mt->stacksz = 0;
 	mt->localsz = 0;
 	mt->exception_table = 0;
+	mt->Jexception_table = 0;
 	mt->idx = -1;
 
 	/* Mark constructors as such */
@@ -561,6 +562,7 @@ addMethodCode(Method* m, Code* c)
 	m->stacksz = c->max_stack;
 	m->localsz = c->max_locals;
 	m->exception_table = c->exception_table;
+	m->Jexception_table = c->Jexception_table;
 }
 
 void

@@ -22,6 +22,7 @@ typedef struct _Code {
 	u1*			code;
 	u2			attribute_count;
 	struct _jexception*	exception_table;
+	struct _jexception*	Jexception_table;
 	union _attribute_info*	attributes;
 } Code;
 

@@ -43,6 +43,6 @@ Method* findMethod(Hjava_lang_Class*, Utf8Const*, Utf8Const*);
 Method* findMethodLocal(Hjava_lang_Class*, Utf8Const*, Utf8Const*);
 
 void	findExceptionInMethod(uintp, Hjava_lang_Class*, exceptionInfo*);
-bool	findExceptionBlockInMethod(uintp, Hjava_lang_Class*, Method*, exceptionInfo*);
+bool	findExceptionBlockInMethod(uintp, Hjava_lang_Class*, Method*, exceptionInfo*, bool isNative);
 
 #endif

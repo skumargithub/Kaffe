@@ -343,9 +343,9 @@ installMethodCode(Method* meth, nativeCodeInfo* code)
 	FLUSH_DCACHE(meth->ncode, meth->c.ncode.ncode_end);
 
 	/* Translate exception table and make it available */
-	if (meth->exception_table != 0) {
-		for (i = 0; i < meth->exception_table->length; i++) {
-			e = &meth->exception_table->entry[i];
+	if (meth->Jexception_table != 0) {
+		for (i = 0; i < meth->Jexception_table->length; i++) {
+			e = &meth->Jexception_table->entry[i];
 			e->start_pc = INSNPC(e->start_pc) + (uintp)code->code;
 			e->end_pc = INSNPC(e->end_pc) + (uintp)code->code;
 			e->handler_pc = INSNPC(e->handler_pc) + (uintp)code->code;

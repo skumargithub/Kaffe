@@ -257,7 +257,7 @@ findExceptionInMethod(uintp pc, Hjava_lang_Class* class, exceptionInfo* info)
 
 	ptr = findMethodFromPC(pc);
 	if (ptr != 0) {
-		if (findExceptionBlockInMethod(pc, class, ptr, info) == true) {
+		if (findExceptionBlockInMethod(pc, class, ptr, info, true) == true) {
 			return;
 		}
 	}
@@ -269,8 +269,9 @@ DBG(ELOOKUP,	dprintf("Exception not found.\n");			)
  * Look for exception block in method.
  */
 bool
-findExceptionBlockInMethod(uintp pc, Hjava_lang_Class* class, Method* ptr, exceptionInfo* info)
+findExceptionBlockInMethod(uintp pc, Hjava_lang_Class* class, Method* ptr, exceptionInfo* info, bool isNative)
 {
+	struct _jexception*	etable;
 	jexceptionEntry* eptr;
 	Hjava_lang_Class* cptr;
 	int i;
@@ -279,16 +280,19 @@ findExceptionBlockInMethod(uintp pc, Hjava_lang_Class* class, Method* ptr, excep
 	info->method = ptr;
 	info->class = ptr->class;
 
-	eptr = &ptr->exception_table->entry[0];
-
-DBG(ELOOKUP,	
-	dprintf("Nr of exceptions = %d\n", ptr->exception_table->length); )
-
-	/* Right method - look for exception */
 	if (ptr->exception_table == 0) {
 		return (false);
 	}
-	for (i = 0; i < ptr->exception_table->length; i++) {
+
+    etable = (isNative == true) ? ptr->Jexception_table : ptr->exception_table;
+
+	eptr = etable->entry;
+
+DBG(ELOOKUP,	
+	dprintf("Nr of exceptions = %d\n", etable->length); )
+
+	/* Right method - look for exception */
+	for (i = 0; i < etable->length; i++) {
 		uintp start_pc = eptr[i].start_pc;
 		uintp end_pc = eptr[i].end_pc;
 		uintp handler_pc = eptr[i].handler_pc;

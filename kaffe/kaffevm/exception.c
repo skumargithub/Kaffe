@@ -142,7 +142,8 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
                 res = findExceptionBlockInMethod(   v->pc,
                                                     eobj->base.Idtable->class,
                                                     v->meth,
-                                                    &einfo);
+                                                    &einfo,
+                                                    false);
 
                 /* Find the sync. object */
                 if( einfo.method == 0 ||
@@ -246,7 +247,8 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
                 res = findExceptionBlockInMethod(   v->pc,
                                                     eobj->base.Idtable->class,
                                                     v->meth,
-                                                    &einfo);
+                                                    &einfo,
+                                                    false);
 
                 /* Find the sync. object */
                 if( einfo.method == 0 ||

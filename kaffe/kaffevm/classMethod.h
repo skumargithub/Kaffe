@@ -127,6 +127,7 @@ typedef struct _methods {
 	} c;
 	Hjava_lang_Class*	class;
 	struct _lineNumbers*	lines;
+	struct _jexception*	Jexception_table;
 	struct _jexception*	exception_table;
 	u2			ndeclared_exceptions;
 	constIndex*		declared_exceptions;
