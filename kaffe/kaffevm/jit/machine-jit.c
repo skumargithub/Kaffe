@@ -29,7 +29,7 @@
 #include "labels.h"
 #include "constpool.h"
 #include "codeproto.h"
-#include "checks.h"
+#include "checks-jit.h"
 #include "access.h"
 #include "object.h"
 #include "constants.h"
