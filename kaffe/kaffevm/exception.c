@@ -8,7 +8,6 @@
  * See the file "license.terms" for information on usage and redistribution 
  * of this file. 
  */
-
 #include "debug.h"
 
 #include "config.h"
@@ -34,6 +33,7 @@
 #include "locks.h"
 #include "stackTrace.h"
 
+#if 0
 #if defined(INTERPRETER)
 #define	DEFINEFRAME()		/* Does nothing */
 #define	FIRSTFRAME(f, e)	/* Does nothing */
@@ -45,6 +45,7 @@
 #define	DEFINEFRAME()		exceptionFrame frame
 #define	DISPATCHFRAME(e)	dispatchException((Hjava_lang_Throwable*)(e), &frame)
 #define	EXCEPTIONFRAMEPTR	&frame
+#endif
 #endif
 #define	GETNEXTFRAME(F)		((*Kaffe_ThreadInterface.nextFrame)(F))
 
@@ -79,14 +80,52 @@ throwException(Hjava_lang_Object* eobj)
 void
 throwExternalException(Hjava_lang_Object* eobj)
 {
-	DEFINEFRAME();
-	if (eobj == 0) {
-		fprintf(stderr, "Exception thrown on null object ... aborting\n");
-		ABORT();
-		EXIT(1);
-	}
-	FIRSTFRAME(frame, eobj);
-	DISPATCHFRAME(eobj);
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+        {
+            /*
+             * Pure Interpreter
+             */
+            if (eobj == 0) {
+                fprintf(stderr, "Exception thrown on null object ... abort\n");
+                ABORT();
+                EXIT(1);
+            }
+
+            dispatchException((Hjava_lang_Throwable*) eobj, NULL);
+        }
+        break;
+
+        case 20:
+        {
+            /*
+             * Pure JIT
+             */
+            exceptionFrame frame;
+            if (eobj == 0) {
+                fprintf(stderr, "Exception thrown on null object ... abort\n");
+                ABORT();
+                EXIT(1);
+            }
+
+            frame = *((exceptionFrame*)(((uintp)&(eobj))-8));
+            dispatchException((Hjava_lang_Throwable*) eobj, &frame);
+        }
+        break;
+
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
 }
 
 void
@@ -127,7 +166,8 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 	unhand(ct)->exceptObj = (struct Hkaffe_util_Ptr*)eobj;
 
 	/* Search down exception stack for a match */
-#if defined(INTERPRETER)
+/* #if defined(__INTERPRETER__) */
+    if(Kaffe_JavaVMArgs[0].JITstatus == 10)
 	{
 		exceptionInfo einfo;
 		vmException* frame;
@@ -174,7 +214,8 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 			}
 		}
 	}
-#elif defined(TRANSLATOR)
+    else if(Kaffe_JavaVMArgs[0].JITstatus == 20)
+/* #elif defined(__TRANSLATOR__) */
 	{
 		exceptionFrame* frame;
 		exceptionInfo einfo;
@@ -216,7 +257,11 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 			}
 		}
 	}
-#endif
+    else
+    {
+        assert(0);
+    }
+/* #endif */
 
 	/* Clear held exception object */
 	unhand(ct)->exceptObj = 0;
@@ -271,16 +316,53 @@ nullException(EXCEPTIONPROTO)
 {
 	Hjava_lang_Throwable* npe;
 
-	DEFINEFRAME();
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+        {
+            /*
+             * Pure Interpreter
+             */
+            /* don't catch the signal if debugging exceptions */
+            if (DBGEXPR(EXCEPTION, false, true))
+                catchSignal(sig, nullException);
 
-	/* don't catch the signal if debugging exceptions */
-	if (DBGEXPR(EXCEPTION, false, true))
-		catchSignal(sig, nullException);
+            npe = (Hjava_lang_Throwable*)NullPointerException;
+            unhand(npe)->backtrace = buildStackTrace(NULL);
+            dispatchException(npe, NULL);
+        }
+        break;
 
-	EXCEPTIONFRAME(frame, ctx);
-	npe = (Hjava_lang_Throwable*)NullPointerException;
-	unhand(npe)->backtrace = buildStackTrace(EXCEPTIONFRAMEPTR);
-	DISPATCHFRAME(npe);
+        case 20:
+        {
+            /*
+             * Pure JIT
+             */
+            exceptionFrame frame;
+
+            /* don't catch the signal if debugging exceptions */
+            if (DBGEXPR(EXCEPTION, false, true))
+                catchSignal(sig, nullException);
+
+            EXCEPTIONFRAME(frame, ctx);
+            npe = (Hjava_lang_Throwable*)NullPointerException;
+            unhand(npe)->backtrace = buildStackTrace(&frame);
+            dispatchException(npe, &frame);
+        }
+        break;
+
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
 }
 
 /*
@@ -290,15 +372,54 @@ static void
 floatingException(EXCEPTIONPROTO)
 {
 	Hjava_lang_Throwable* ae;
-	DEFINEFRAME();
 
-	/* don't catch the signal if debugging exceptions */
-	if (DBGEXPR(EXCEPTION, false, true))
-		catchSignal(sig, floatingException);
-	EXCEPTIONFRAME(frame, ctx);
-	ae = (Hjava_lang_Throwable*)ArithmeticException;
-	unhand(ae)->backtrace = buildStackTrace(EXCEPTIONFRAMEPTR);
-	DISPATCHFRAME(ae);
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+        {
+            /*
+             * Pure Interpreter
+             */
+            /* don't catch the signal if debugging exceptions */
+            if (DBGEXPR(EXCEPTION, false, true))
+                catchSignal(sig, floatingException);
+
+            ae = (Hjava_lang_Throwable*)ArithmeticException;
+            unhand(ae)->backtrace = buildStackTrace(NULL);
+            dispatchException(ae, NULL);
+        }
+        break;
+
+        case 20:
+        {
+            /*
+             * Pure JIT
+             */
+            exceptionFrame frame;
+
+            /* don't catch the signal if debugging exceptions */
+            if (DBGEXPR(EXCEPTION, false, true))
+                catchSignal(sig, nullException);
+
+            EXCEPTIONFRAME(frame, ctx);
+            ae = (Hjava_lang_Throwable*)ArithmeticException;
+            unhand(ae)->backtrace = buildStackTrace(&frame);
+            dispatchException(ae, &frame);
+        }
+        break;
+
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
 }
 
 /*
