@@ -101,9 +101,9 @@ DBG(NEWINSTR,
  */
 #define	MAXDIMS	16
 
-#if defined(INTERPRETER)
+/* #if defined(__INTERPRETER__) */
 void*
-soft_multianewarray(Hjava_lang_Class* class, jint dims, slots* args)
+soft_multianewarray_intrp(Hjava_lang_Class* class, jint dims, slots* args)
 {
         int array[MAXDIMS];
         Hjava_lang_Object* obj;
@@ -142,11 +142,11 @@ soft_multianewarray(Hjava_lang_Class* class, jint dims, slots* args)
         /* Return the base object */
 	return (obj);
 }
-#endif
+/* #endif */
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 void*
-soft_multianewarray(Hjava_lang_Class* class, jint dims, ...)
+soft_multianewarray_jit(Hjava_lang_Class* class, jint dims, ...)
 {
 	va_list ap;
 	int array[MAXDIMS];
@@ -184,8 +184,9 @@ soft_multianewarray(Hjava_lang_Class* class, jint dims, ...)
 	/* Return the base object */
 	return (obj);
 }
-#endif
+/* #endif */
 
+#if 0
 /*
  * soft_lookupmethod.
  */
@@ -201,11 +202,48 @@ soft_lookupmethod(Hjava_lang_Object* obj, Utf8Const* name, Utf8Const* sig)
 		throwException(NoSuchMethodError(name->data));
 	}
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 	return (METHOD_NATIVECODE(meth));
-#else
+/* #else */
 	return (meth);
+/* #endif */
+}
 #endif
+
+/*
+ * soft_lookupmethod_intrp.
+ */
+void*
+soft_lookupmethod_intrp(Hjava_lang_Object* obj, Utf8Const* name, Utf8Const* sig)
+{
+	Hjava_lang_Class* cls;
+	Method* meth;
+
+	cls = OBJECT_CLASS(obj);
+	meth = findMethod(cls, name, sig);
+	if (meth == 0) {
+		throwException(NoSuchMethodError(name->data));
+	}
+
+	return (meth);
+}
+
+/*
+ * soft_lookupmethod_jit.
+ */
+void*
+soft_lookupmethod_jit(Hjava_lang_Object* obj, Utf8Const* name, Utf8Const* sig)
+{
+	Hjava_lang_Class* cls;
+	Method* meth;
+
+	cls = OBJECT_CLASS(obj);
+	meth = findMethod(cls, name, sig);
+	if (meth == 0) {
+		throwException(NoSuchMethodError(name->data));
+	}
+
+	return (METHOD_NATIVECODE(meth));
 }
 
 #if 0
@@ -230,11 +268,17 @@ soft_lookupinterfacemethod(Hjava_lang_Class* class, Utf8Const* name, Utf8Const* 
 			if (!(mptr->accflags & ACC_PUBLIC)) {
 				throwException(IllegalAccessError);
 			}
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
+if(!(meth->accflags & ACC_TOINTERPRET))
+{
 			return (METHOD_NATIVECODE(mptr));
-#else
+}
+/* #else */
+else
+{
 			return (mptr);
-#endif
+}
+/* #endif */
 		}
 	}
 	throwException(IncompatibleClassChangeError);
