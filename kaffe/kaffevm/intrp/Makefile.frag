@@ -8,6 +8,6 @@
 
 ENGINE_CFLAGS=	-DINTERPRETER -I$(srcdir)/intrp  
 
-ENGINE_OBJECTS= machine$(OBJEXT)
+ENGINE_OBJECTS= machine-intrp$(OBJEXT)
 
-machine.o:	machine.c kaffe.def
+machine.o:	machine-intrp.c kaffe.intrp.def
