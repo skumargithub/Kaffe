@@ -16,3 +16,9 @@ There might be some problem with soft_lookup_method
 In the case of JIT it returns meth->ncode
 In the case of INT it returns meth
 What happens when we mix??
+
+--
+
+Tag info:
+
+1. Unified: Single executable
