@@ -75,12 +75,58 @@ buildStackTrace(struct _exceptionFrame* base)
 	struct _stackTrace trace;
 	stackTraceInfo* info;
 
-	STACKTRACEINIT(trace, base, base);
 	cnt = 0;
-	while(!STACKTRACEEND(trace)) {
-		STACKTRACESTEP(trace);
-		cnt++;
-	}
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+        {
+            /*
+             * Pure Interpreter
+             */
+            vmException *e = (vmException*)
+                unhand(Kaffe_ThreadInterface.currentJava())->exceptPtr;
+
+            while(!(e == 0 || e->meth == (Method*) 1)) {
+                e = Kaffe_ThreadInterface.nextFrame(e);
+                cnt++;
+            }
+        }
+        break;
+
+        case 20:
+        {
+            /*
+             * Pure JIT
+             */
+            struct _exceptionFrame* e;
+            if(base == NULL)
+            {
+                e = (exceptionFrame*) (((uintp)&(base))-8);
+            }
+            else
+            {
+                e = base;
+            }
+
+            while(e != 0) {
+                e = Kaffe_ThreadInterface.nextFrame(e);
+                cnt++;
+            }
+        }
+        break;
+
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
 
 	/* Build an array of stackTraceInfo */
 	info = gc_malloc(sizeof(stackTraceInfo) * (cnt+1), GC_ALLOC_NOWALK);
