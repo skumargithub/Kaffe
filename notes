@@ -25,6 +25,7 @@ JNI stuff
 
 --
 
-Tag info:
+Tag info: (To give tag -> cvs tag tag-name)
 
 1. Unified: Single executable
+2. BasicMix: Basic stuff in mix modes work
