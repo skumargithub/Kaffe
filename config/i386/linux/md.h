@@ -19,6 +19,8 @@
 #include "jit-md.h"
 #endif
 
+void init_md(void);
+
 /* Linux requires a little initialisation */
 #define	INIT_MD()	init_md()
 
