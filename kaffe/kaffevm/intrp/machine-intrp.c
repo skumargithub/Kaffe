@@ -170,7 +170,7 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 static bool
 canBeTranslated(Method *meth)
 {
-    return false;
+    return true;
 }
 
 void
@@ -313,6 +313,21 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 		}
 		return;
 	}
+
+    if(Kaffe_JavaVMArgs[0].JITstatus == 30 && canBeTranslated(meth))
+    {
+        methodTrampoline *tramp = (methodTrampoline*) meth->ncode;
+        FILL_IN_TRAMPOLINE(tramp, meth);
+
+        meth->accflags ^= ACC_TOINTERPRET;
+
+#if 0
+        fprintf(stderr, "%s.%s%s will be JIT on next run\n",
+                        meth->class->name->data,
+                        meth->name->data,
+                        meth->signature->data);
+#endif
+    }
 
 	/* Verify method if required */
 	if ((methaccflags & ACC_VERIFIED) == 0) {
@@ -676,20 +691,6 @@ break;
 	if (tid != NULL && unhand(tid)->PrivateInfo != 0) {
 		unhand(tid)->exceptPtr = (struct Hkaffe_util_Ptr*)mjbuf.prev;
 	}
-
-    if(Kaffe_JavaVMArgs[0].JITstatus == 30 && canBeTranslated(meth))
-    {
-        translate(meth);
-
-        meth->accflags ^= ACC_TOINTERPRET;
-
-        /* Update dispatch table */
-        if (meth->idx >= 0) {
-            meth->class->dtable->method[meth->idx] = METHOD_NATIVECODE(meth);
-        }
-
-        fprintf(stderr, "%s will be now be JIT\n", meth->name->data);
-    }
 
 RDBG(	dprintf("Returning from method %s%s.\n", meth->name->data, meth->signature->data); )
 }
