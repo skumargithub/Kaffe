@@ -8,6 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution 
  * of this file. 
  */
+#define INTERPRETER
 
 #include "debug.h"
 #define	CDBG(s) 	DBG(INT_VMCALL, s)
@@ -30,7 +31,7 @@
 #include "object.h"
 #include "constants.h"
 #include "gc.h"
-#include "machine.h"
+#include "machine-intrp.h"
 #include "lookup.h"
 #include "code-analyse.h"
 #include "soft.h"
@@ -187,7 +188,7 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 			fprintf(stderr, "Unknown bytecode %d\n", code[pc]);
 			throwException(VerifyError);
 			break;
-#include "kaffe.def"
+#include "kaffe.intrp.def"
 		}
 	}
 	end:
