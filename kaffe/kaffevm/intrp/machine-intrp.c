@@ -101,8 +101,9 @@ do {								\
 	}							\
 } while (0)
 
+static
 void
-intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
+intrp_to_jit(Method* meth, callMethodInfo *call)
 {
 	char* sig = meth->signature->data;
 	int i = 0;
@@ -180,10 +181,7 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 
 	/* Call info and arguments */
 	call->nrargs = i;
-    call->args = args;
 	call->argsize = s;
-	call->ret = R;
-	call->function = meth->ncode;
 }
 
 void
@@ -319,6 +317,7 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 			break;
 
 case INVOKEVIRTUAL:
+{
 	/*
 	 * ..., obj, ..args.., -> ...
 	 */
@@ -364,14 +363,19 @@ case INVOKEVIRTUAL:
 		low = method_returntype();
         softcall_initialise_class(method_class());
 
-        if(((Method*) tmp[0].v.taddr)->accflags & ACC_TOINTERPRET)
+        cinfo.method = tmp[0].v.taddr;
+        if(cinfo.method->accflags & ACC_TOINTERPRET)
         {
-            virtualMachine(tmp[0].v.taddr, sp+1, retval, tid);
+            virtualMachine(cinfo.method, sp+1, retval, tid);
         }
         else
         {
-            assert(0);
-            intrp_to_jit(tmp[0].v.taddr, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            cM.args = (jvalue*) (sp + 1);
+            cM.ret = (jvalue*) retval;
+            cM.function = cinfo.method->ncode;
+
+            intrp_to_jit(cinfo.method, &cM);
+
             sysdepCallMethod(&cM);
         }
 
@@ -381,6 +385,7 @@ case INVOKEVIRTUAL:
 		start_sub_block();
 		METHOD_RETURN_VALUE();
 	}
+}
 break;
 
 case INVOKESPECIAL:
@@ -428,8 +433,12 @@ case INVOKESPECIAL:
         }
         else
         {
-            assert(0);
-            intrp_to_jit(cinfo.method, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            cM.args = (jvalue*) (sp + 1);
+            cM.ret = (jvalue*) retval;
+            cM.function = cinfo.method->ncode;
+
+            intrp_to_jit(cinfo.method, &cM);
+
             sysdepCallMethod(&cM);
         }
 
@@ -479,8 +488,12 @@ case INVOKESTATIC:
         }
         else
         {
-            assert(0);
-            intrp_to_jit(cinfo.method, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            cM.args = (jvalue*) (sp + 1);
+            cM.ret = (jvalue*) retval;
+            cM.function = cinfo.method->ncode;
+
+            intrp_to_jit(cinfo.method, &cM);
+
             sysdepCallMethod(&cM);
         }
 
@@ -535,14 +548,19 @@ case INVOKEINTERFACE:
 		low = method_returntype();
         softcall_initialise_class(method_class());
 
-        if(((Method*) tmp[0].v.taddr)->accflags & ACC_TOINTERPRET)
+        cinfo.method = tmp[0].v.taddr;
+        if(cinfo.method->accflags & ACC_TOINTERPRET)
         {
-            virtualMachine(tmp[0].v.taddr, sp+1, retval, tid);
+            virtualMachine(cinfo.method, sp+1, retval, tid);
         }
         else
         {
-            assert(0);
-            intrp_to_jit(tmp[0].v.taddr, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            cM.args = (jvalue*) (sp + 1);
+            cM.ret = (jvalue*) retval;
+            cM.function = cinfo.method->ncode;
+
+            intrp_to_jit(cinfo.method, &cM);
+
             sysdepCallMethod(&cM);
         }
 
