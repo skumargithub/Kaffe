@@ -4932,7 +4932,7 @@ Makefile \
 config/Makefile include/Makefile kaffe/Makefile test/Makefile \
 libraries/Makefile \
 kaffe/kaffevm/Makefile kaffe/kaffe/Makefile \
-kaffe/man/Makefile kaffe/scripts/Makefile \
+kaffe/scripts/Makefile \
 "
 
 make_output="$make_output \
