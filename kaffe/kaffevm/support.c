@@ -23,8 +23,8 @@
 #include "lookup.h"
 #include "errors.h"
 #include "exception.h"
-#include "slots.h"
-#include "machine.h"
+/* #include "slots.h" */
+/* #include "machine.h" */
 #include "support.h"
 #include "md.h"
 #include "itypes.h"

@@ -22,7 +22,7 @@
 #include "object.h"
 #include "classMethod.h"
 #include "readClass.h"
-#include "slots.h"
+/* #include "slots.h" */
 #include "exception.h"
 
 void

@@ -19,7 +19,7 @@
 #include <stdarg.h>
 #include "gtypes.h"
 #include "bytecode.h"
-#include "slots.h"
+/* #include "slots.h" */
 #include "access.h"
 #include "object.h"
 #include "constants.h"
@@ -34,7 +34,7 @@
 #include "thread.h"
 #include "baseClasses.h"
 #include "itypes.h"
-#include "machine.h"
+/* #include "machine.h" */
 
 /*
  * soft_new

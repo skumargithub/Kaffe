@@ -24,7 +24,7 @@
 #include "code-analyse.h"
 #include "lookup.h"
 #include "exception.h"
-#include "icode.h"
+/* #include "icode.h" */
 #include "itypes.h"
 #include "locks.h"
 #include "md.h"

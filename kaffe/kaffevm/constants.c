@@ -16,7 +16,7 @@
 #include "config-mem.h"
 #include "config-hacks.h"
 #include "gtypes.h"
-#include "slots.h"
+/* #include "slots.h" */
 #include "access.h"
 #include "object.h"
 #include "constants.h"

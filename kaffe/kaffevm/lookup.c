@@ -15,7 +15,7 @@
 #include "config-mem.h"
 #include "jtypes.h"
 #include "errors.h"
-#include "slots.h"
+/* #include "slots.h" */
 #include "access.h"
 #include "object.h"
 #include "constants.h"
@@ -24,7 +24,7 @@
 #include "exception.h"
 #include "thread.h"
 #include "baseClasses.h"
-#include "machine.h"
+/* #include "machine.h" */
 #include "locks.h"
 #include "soft.h"
 

@@ -20,7 +20,7 @@
 #include "object.h"
 #include "constants.h"
 #include "classMethod.h"
-#include "slots.h"
+/* #include "slots.h" */
 #include "external.h"
 #include "errors.h"
 #include "exception.h"

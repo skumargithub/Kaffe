@@ -23,8 +23,8 @@
 #include "baseClasses.h"
 #include "thread.h"
 #include "lookup.h"
-#include "slots.h"
-#include "machine.h"
+/* #include "slots.h" */
+/* #include "machine.h" */
 #include "exception.h"
 #include "itypes.h"
 #include "md.h"

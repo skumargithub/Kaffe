@@ -17,7 +17,7 @@
 #include "lookup.h"
 #include "exception.h"
 #include "code.h"
-#include "slots.h"
+/* #include "slots.h" */
 
 /*
  * Add a class to the system.
