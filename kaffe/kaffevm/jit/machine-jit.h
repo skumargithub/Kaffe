@@ -87,20 +87,6 @@
 #define	SOFT_ADDREFERENCE_STATIC(_f, _t)
 #endif
 
-struct _methods;
-void translate(struct _methods*);
-
-typedef struct _nativeCodeInfo {
-	void*	mem;
-	int	memlen;
-	void*	code;
-	int	codelen;
-} nativeCodeInfo;
-
-void initInsnSequence(int, int, int);
-void finishInsnSequence(nativeCodeInfo*);
-void installMethodCode(Method*, nativeCodeInfo*);
-
 typedef struct {
         bool BADARRAYINDEX;
         bool NULLPOINTER;
