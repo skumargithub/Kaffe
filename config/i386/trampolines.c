@@ -36,21 +36,27 @@ TRAMPOLINE_FUNCTION()
 asm(
 	START_ASM_FUNC() C_FUNC_NAME(i386_do_fixup_trampoline) "\n"
 C_FUNC_NAME(i386_do_fixup_trampoline) ":			\n
-    pushl   %eax                                        \n
-    pushl   %ebx                                        \n
-	call	" C_FUNC_NAME(soft_fixup_trampoline) "		\n
-	popl	%ebx						\n
-	popl	%eax						\n
+    pushl   %ecx        /* address to go to */
+    pushl   %ebx        /* flag indicating if JIT or intrp */
+	call	" C_FUNC_NAME(soft_fixup_trampoline) "
+	popl	%ebx
+	popl	%ecx
 
     cmpl    $1,%ebx
     je      1f
-    call    *%eax
+
+    pushl   %eax
+    pushl   %edx
+    call    *%ecx
+    popl    %eax
+    popl    %edx
+
     popl    %ecx
     ret
 
 1:
-	popl	%ecx						\n
-	jmp	    *%eax"
+	popl	%eax
+	jmp	    *%ecx"
 	END_ASM_FUNC()
 );
 
