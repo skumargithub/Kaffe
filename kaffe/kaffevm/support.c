@@ -50,6 +50,7 @@ nativeFunction* native_funcs = null_funcs;
 
 extern struct JNIEnv_ Kaffe_JNIEnv;
 
+void virtualMachine(methods*, slots* volatile, slots*, Hjava_lang_Thread*);
 
 /*
  * Call a Java method from native code.
@@ -330,12 +331,17 @@ callMethodA(Method* meth, void* func, void* obj, jvalue* args, jvalue* ret)
 	call.args = in;
 	call.ret = ret;
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
+if(!(meth->accflags & ACC_TOINTERPRET))
+{
 	call.function = func;
 	/* Make the call - system dependent */
 	sysdepCallMethod(&call);
-#endif
-#if defined(INTERPRETER)
+}
+/* #endif */
+/* #if defined(__INTERPRETER__) */
+else
+{
 	if ((meth->accflags & ACC_NATIVE) == 0) {
 		virtualMachine(meth, (slots*)call.args, (slots*)call.ret, (*Kaffe_ThreadInterface.currentJava)());
 	}
@@ -362,7 +368,8 @@ callMethodA(Method* meth, void* func, void* obj, jvalue* args, jvalue* ret)
 			unlockMutex(sync);
 		}
 	}
-#endif
+}
+/* #endif */
 }
 
 /*
@@ -506,12 +513,17 @@ callMethodV(Method* meth, void* func, void* obj, va_list args, jvalue* ret)
 	call.args = in;
 	call.ret = ret;
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
+if(!(meth->accflags & ACC_TOINTERPRET))
+{
 	call.function = func;
 	/* Make the call - system dependent */
 	sysdepCallMethod(&call);
-#endif
-#if defined(INTERPRETER)
+}
+else
+{
+/* #endif */
+/* #if defined(__INTERPRETER__) */
 	if ((meth->accflags & ACC_NATIVE) == 0) {
 		virtualMachine(meth, (slots*)call.args, (slots*)call.ret, (*Kaffe_ThreadInterface.currentJava)());
 	}
@@ -538,7 +550,8 @@ callMethodV(Method* meth, void* func, void* obj, va_list args, jvalue* ret)
 			unlockMutex(sync);
 		}
 	}
-#endif
+}
+/* #endif */
 }
 
 /*
