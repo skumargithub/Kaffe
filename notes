@@ -8,3 +8,8 @@ Tests that the intrp fails
     ProcessTest
     ThreadLocalTest
 }
+
+There might be some problem with soft_lookup_method
+In the case of JIT it returns meth->ncode
+In the case of INT it returns meth
+What happens when we mix??
