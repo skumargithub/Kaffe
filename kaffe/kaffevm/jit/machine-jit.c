@@ -332,7 +332,10 @@ installMethodCode(Method* meth, nativeCodeInfo* code)
 	/* Work out new estimate of code per bytecode */
 	code_generated += code->memlen;
 	bytecode_processed += meth->c.bcode.codelen;
-	codeperbytecode = code_generated / bytecode_processed;
+    if(bytecode_processed != 0)
+    {
+        codeperbytecode = code_generated / bytecode_processed;
+    }
 
 	GC_WRITE(meth, code->mem);
 	SET_METHOD_NATIVECODE(meth, code->code);
