@@ -1387,8 +1387,47 @@ printMethodStats(void)
     struct _jexception* ex;
 	int ipool;
 	int imeth;
+    const char *fileName;
+    FILE* fp;
 
-    fprintf(stderr, "In printMethodStats()\n");
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+            /*
+             * Pure interpreter
+             */
+            fileName = "stat.d";
+        break;
+
+        case 20:
+            /*
+             * Pure JIT
+             */
+            fileName = "stat.d";
+        break;
+        
+        case 30:
+            /*
+             * Mix JIT on internal heuristic, we start with the
+             * interpreter flag set for all methods
+             */
+            fileName = "stat.m";
+        break;
+
+        case 40:
+            /*
+             * Mix Some JIT
+             */
+            fileName = "stat.s";
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
+
+    fp = fopen(fileName, "w");
+    assert(fp);
 
 	for (ipool = CLASSHASHSZ;  --ipool >= 0; )
     {
@@ -1405,7 +1444,7 @@ printMethodStats(void)
                     {
                         ex = ptr->exception_table;
 
-                        fprintf(stderr,
+                        fprintf(fp,
                                 "%s.%s%s\n"
                                 "I=%4d, "
                                 "B=%4d, Br=%3d, X=%2d, S=%2d, E=%2d, "
@@ -1426,4 +1465,6 @@ printMethodStats(void)
 			}
 		}
 	}
+
+    fclose(fp);
 }
