@@ -38,6 +38,7 @@
 #include "gc.h"
 #include "locks.h"
 #include "md.h"
+#include "trampolines.h"
 
 #define	CLASSHASHSZ	256	/* Must be a power of two */
 static iLock classHashLock;
