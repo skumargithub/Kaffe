@@ -61,11 +61,6 @@ main(int argc, char* argv[])
 	java_version = "1.1";
 	vmargs.version = 0x00010001;
 
-    /*
-     * By default JIT the entire code
-     */
-    vmargs.JITstatus = 20;
-
 	JNI_GetDefaultJavaVMInitArgs(&vmargs);
 
 	cp = getenv(CLASSPATH1);
