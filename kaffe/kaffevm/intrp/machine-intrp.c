@@ -299,7 +299,7 @@ virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thr
         meth->accflags ^= ACC_TOINTERPRET;
     }
 
-    meth->stats.intrpInvokeCount++;
+    meth->stats.invokeCount++;
 
 CDBG(	dprintf("Call: %s.%s%s.\n", meth->class->name->data, meth->name->data, meth->signature->data); )
 

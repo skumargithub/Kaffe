@@ -429,7 +429,7 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
 	mt->exception_table = 0;
 	mt->Jexception_table = 0;
 	mt->idx = -1;
-    mt->stats.intrpInvokeCount = 0;
+    mt->stats.invokeCount = 0;
     mt->stats.numByteCode = 0;
     mt->stats.numBranch = 0;
     mt->stats.numSwitch = 0;
@@ -1401,23 +1401,19 @@ printMethodStats(void)
 				ptr = CLASS_METHODS(entry->class);
 				for (; --imeth >= 0;  ptr++)
                 {
-                    if(ptr->stats.intrpInvokeCount != 0)
+                    if(ptr->stats.invokeCount != 0)
                     {
                         ex = ptr->exception_table;
 
                         fprintf(stderr,
-#if 0
-                                "%s.%s%s "
-#endif
+                                "%s.%s%s\n"
                                 "I=%4d, "
                                 "B=%4d, Br=%3d, X=%2d, S=%2d, E=%2d, "
                                 "V=%7llu, T=%7llu\n",
-#if 0
                                 ptr->class->name->data,
                                 ptr->name->data,
                                 ptr->signature->data,
-#endif
-                                ptr->stats.intrpInvokeCount,
+                                ptr->stats.invokeCount,
                                 ptr->stats.numByteCode,
                                 ptr->stats.numBranch,
                                 ex ? ex->length : 0,

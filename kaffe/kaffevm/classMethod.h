@@ -109,7 +109,7 @@ typedef struct _classEntry {
 
 typedef struct _statInfo
 {
-    int intrpInvokeCount;
+    int invokeCount;
     int numByteCode;
     int numBranch;
     int numSwitch;

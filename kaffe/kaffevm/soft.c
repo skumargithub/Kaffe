@@ -506,6 +506,7 @@ soft_fixup_trampoline(uintp flagValue, uintp jmpValue, FIXUP_TRAMPOLINE_DECL)
 
 TDBG(	fprintf(stderr, "Calling %s:%s%s @ 0x%x\n", meth->class->name->data, meth->name->data, meth->signature->data, METHOD_NATIVECODE(meth));	)
 
+        meth->stats.invokeCount++;
         *jmpAddress = (uintp) METHOD_NATIVECODE(meth);
         *flagAddress = 1;
     }
