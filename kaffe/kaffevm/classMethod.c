@@ -1237,7 +1237,7 @@ lookupArray(Hjava_lang_Class* c)
 	return (centry->class);
 }
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 /*
  * Find method containing pc.
  */
@@ -1264,4 +1264,4 @@ findMethodFromPC(uintp pc)
 	}
 	return (NULL);
 }
-#endif
+/* #endif */
