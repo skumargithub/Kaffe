@@ -312,6 +312,14 @@ struct JavaVMInitArgs {
 	jint		enableVerboseClassloading;
 	jint		enableVerboseJIT;
 	jint		allocHeapSize;
+
+    /*
+     * 10 = disabled
+     * 20 = enabled   (this is the default)
+     * 30 = Mix it up
+     */
+	jint		JITstatus;
+
 	const char*	classhome;
 	const char*	librarypath;
 };
