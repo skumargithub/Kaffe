@@ -267,7 +267,7 @@
 #define	cvt_double_int(t, f)			(t)[0].v.tint = floor((f)[0].v.tdouble)
 #define	cvt_double_float(t, f)			(t)[0].v.tfloat = (f)[0].v.tdouble
 
-#define	softcall_lookupmethod(r, n, t)		(r)[0].v.taddr = soft_lookupmethod((t)[0].v.taddr, (n)->name, (n)->signature)
+#define	softcall_lookupmethod(r, n, t)		(r)[0].v.taddr = soft_lookupmethod_intrp((t)[0].v.taddr, (n)->name, (n)->signature)
 #define	softcall_new(r, t)			(r)->v.taddr = soft_new(t)
 #define	softcall_newarray(r, s, t)		(r)->v.taddr = soft_newarray(t, (s)->v.tint)
 #define	softcall_anewarray(r, s, t)		(r)->v.taddr = soft_anewarray(t, (s)->v.tint)
@@ -279,7 +279,7 @@
 #define	softcall_monitorenter(o)		lockMutex((o)[0].v.taddr)
 #define	softcall_monitorexit(o)			unlockMutex((o)[0].v.taddr)
 
-#define	softcall_multianewarray(r, z, s, t)	(r)->v.taddr = soft_multianewarray(t, z, s)
+#define	softcall_multianewarray(r, z, s, t)	(r)->v.taddr = soft_multianewarray_intrp(t, z, s)
 
 #define	softcall_badarrayindex()		soft_badarrayindex()
 #define	softcall_nullpointer()			soft_nullpointer()

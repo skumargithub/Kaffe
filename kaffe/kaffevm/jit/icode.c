@@ -25,7 +25,6 @@
 #include "labels.h"
 #include "constpool.h"
 #include "icode-jit.h"
-#include "soft.h"
 #include "access.h"
 #include "object.h"
 #include "constants.h"
@@ -36,6 +35,7 @@
 #include "locks.h"
 #include "machine-jit.h"
 #include "codeproto.h"
+#include "soft.h"
 
 #if defined(WORDS_BIGENDIAN)
 #define	LSLOT(_s)	((_s)+1)
@@ -3288,7 +3288,7 @@ softcall_lookupmethod(SlotInfo* dst, Method* meth, SlotInfo* obj)
 	pusharg_utf8_const(meth->signature, 2);
 	pusharg_utf8_const(meth->name, 1);
 	pusharg_ref(obj, 0);
-	call_soft(soft_lookupmethod);
+	call_soft(soft_lookupmethod_jit);
 	popargs();
 	fixup_function_call();
 	return_ref(dst);
@@ -3429,7 +3429,7 @@ softcall_multianewarray(SlotInfo* dst, int size, SlotInfo* stktop, Hjava_lang_Cl
 	}
 	pusharg_int_const(size, 1);
 	pusharg_class_const(classobj, 0);
-	call_soft(soft_multianewarray);
+	call_soft(soft_multianewarray_jit);
 	popargs();
 	fixup_function_call();
 	return_ref(dst);
