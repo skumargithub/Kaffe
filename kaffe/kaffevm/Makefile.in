@@ -115,7 +115,7 @@ clean:
 		touch .depend
 
 distclean:	clean
-		rm -f md.c jit.def jit/icode-jit.h trampolines.c
+		rm -f md.c jit.def jit/icode-jit.h trampolines.c trampolines.h
 		rm -f thread-native.h locks-native.h
 		rm -f Makefile .depend
 
