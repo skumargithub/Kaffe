@@ -33,46 +33,10 @@
 #include "md.h"
 #include "stackTrace.h"
 
-#if defined(INTERPRETER)
-
-typedef struct _stackTrace {
-	vmException* frame;
-} stackTrace;
-
-#define STACKTRACEINIT(S,I,O)	((S).frame = (vmException*)unhand((*Kaffe_ThreadInterface.currentJava)())->exceptPtr)
-#define	STACKTRACESTEP(S)	((S).frame = (*Kaffe_ThreadInterface.nextFrame)((S).frame))
-#define STACKTRACEPC(S)		((S).frame->pc)
-#define STACKTRACEMETH(S)	((S).frame->meth)
-#define STACKTRACEEND(S)	((S).frame == 0 || (S).frame->meth == (Method*)1)
-
-#elif defined(TRANSLATOR)
-
-typedef struct _stackTrace {
-	struct _exceptionFrame	nframe;
-	struct _exceptionFrame* frame;
-} stackTrace;
-
-#define STACKTRACEINIT(S, I, O)				\
-	{						\
-		if ((I) == NULL) {			\
-			FIRSTFRAME((S).nframe, O);	\
-			(S).frame = &((S).nframe);	\
-		} else {				\
-			(S).frame = (I);		\
-		}					\
-	}
-#define	STACKTRACESTEP(S)	((S).frame = (*Kaffe_ThreadInterface.nextFrame)((S).frame))
-#define STACKTRACEPC(S)		(PCFRAME((S).frame))
-#define	STACKTRACEMETH(S)	(findMethodFromPC(PCFRAME((S).frame)))
-#define	STACKTRACEEND(S)	((S).frame == 0)
-
-#endif
-
 Hjava_lang_Object*
 buildStackTrace(struct _exceptionFrame* base)
 {
 	int cnt;
-	struct _stackTrace trace;
 	stackTraceInfo* info;
 
 	cnt = 0;
@@ -132,14 +96,61 @@ buildStackTrace(struct _exceptionFrame* base)
 	info = gc_malloc(sizeof(stackTraceInfo) * (cnt+1), GC_ALLOC_NOWALK);
 
 	cnt = 0;
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+        {
+            /*
+             * Pure Interpreter
+             */
+            vmException *e = (vmException*)
+                unhand(Kaffe_ThreadInterface.currentJava())->exceptPtr;
 
-	STACKTRACEINIT(trace,base,base);
+            for(; !(e == 0 || e->meth == (Method*) 1);
+                e = Kaffe_ThreadInterface.nextFrame(e)) {
+                info[cnt].pc = e->pc;
+                info[cnt].meth = e->meth;
+                cnt++;
+            }
+        }
+        break;
 
-	for(; !STACKTRACEEND(trace); STACKTRACESTEP(trace)) {
-		info[cnt].pc = STACKTRACEPC(trace);
-		info[cnt].meth = STACKTRACEMETH(trace);
-		cnt++;
-	}
+        case 20:
+        {
+            /*
+             * Pure JIT
+             */
+            struct _exceptionFrame* e;
+            if(base == NULL)
+            {
+                e = (exceptionFrame*) (((uintp)&(base))-8);
+            }
+            else
+            {
+                e = base;
+            }
+
+            for(; e != 0; e = Kaffe_ThreadInterface.nextFrame(e)) {
+                info[cnt].pc = PCFRAME(e);
+                info[cnt].meth = findMethodFromPC(PCFRAME(e));
+                cnt++;
+            }
+        }
+        break;
+
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
+
 	info[cnt].pc = 0;
 	info[cnt].meth = ENDOFSTACK;
 
