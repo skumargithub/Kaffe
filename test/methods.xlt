@@ -1,1 +1,3 @@
 main([Ljava/lang/String;)V
+<clinit>()V
+<init>()V
