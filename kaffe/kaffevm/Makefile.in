@@ -82,7 +82,6 @@ ENGINE_OBJECTS=\
 
 all:		mkkaffevm
 
-@engine_frag@
 @cpu_frag@
 @cpu_os_frag@
 @threads_frag@
