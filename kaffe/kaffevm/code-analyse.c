@@ -96,6 +96,7 @@ CDBG(	dprintf("verifyMethod: %s.%s, codeInfo = 0x%x\n",
 
 	assert (codeInfo == 0 && " Attempt to reenter verifier!");
 
+#if 0
     if(meth->codeInfo != 0)
     {
         /*
@@ -107,9 +108,13 @@ CDBG(	dprintf("verifyMethod: %s.%s, codeInfo = 0x%x\n",
         codeInfo = meth->codeInfo;
         return;
     }
+#endif
 
 	codeInfo = gc_malloc_fixed(sizeof(codeinfo) + (meth->c.bcode.codelen * sizeof(perPCInfo)));
+
+#if 0
     meth->codeInfo = codeInfo;
+#endif
 
 CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 
@@ -1953,9 +1958,11 @@ tidyVerifyMethod(Method *meth, bool freeMem)
 {
 	int pc;
 
+#if 0
     if(freeMem)
     {
         codeInfo = meth->codeInfo;
+#endif
 
         /* Free the old data */
         for (pc = 0; pc < codeInfo->codelen; pc++) {
@@ -1965,8 +1972,10 @@ tidyVerifyMethod(Method *meth, bool freeMem)
         }
         gc_free(codeInfo);
 
+#if 0
         meth->codeInfo = 0;
     }
+#endif
 
 	codeInfo = 0;
 	/* now it's safe to unlock the verifier */
