@@ -472,10 +472,11 @@ soft_initialise_class(Hjava_lang_Class* c)
 /*
  * Trampolines come in here - do the translation and replace the trampoline.
  */
-nativecode*
-soft_fixup_trampoline(FIXUP_TRAMPOLINE_DECL)
+void
+soft_fixup_trampoline(uintp jmpValue, FIXUP_TRAMPOLINE_DECL)
 {
 	Method* meth;
+    uintp *jmpAddress = &jmpValue;
 	FIXUP_TRAMPOLINE_INIT;
 
 	/* If this class needs initializing, do it now.  */
@@ -491,23 +492,9 @@ soft_fixup_trampoline(FIXUP_TRAMPOLINE_DECL)
 		meth->class->dtable->method[meth->idx] = METHOD_NATIVECODE(meth);
 	}
 
-#if 0
-	if (METHOD_PRE_COMPILED(meth)) {
-		nativecode* ncode = METHOD_TRUE_NCODE(meth);
-		nativecode* ocode = METHOD_NATIVECODE(meth);
-		METHOD_NATIVECODE(meth) = ncode;
-		/* Update the dtable entries for all classes if this isn't a
-	   	   static method.  */
-		if (meth->idx >= 0 && ocode != ncode) {
-			meth->class->dtable->method[meth->idx] = ncode;
-		}
-		SET_METHOD_PRE_COMPILED(meth, 0);
-	}
-#endif
-
 TDBG(	fprintf(stderr, "Calling %s:%s%s @ 0x%x\n", meth->class->name->data, meth->name->data, meth->signature->data, METHOD_NATIVECODE(meth));	)
 
-	return (METHOD_NATIVECODE(meth));
+	*jmpAddress = (uintp) METHOD_NATIVECODE(meth);
 }
 /* #endif */
 
