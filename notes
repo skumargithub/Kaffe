@@ -1,0 +1,10 @@
+Tests that the JIT fails
+{
+    ProcessTest
+}
+
+Tests that the intrp fails
+{
+    ProcessTest
+    ThreadLocalTest
+}
