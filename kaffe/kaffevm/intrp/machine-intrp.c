@@ -43,12 +43,6 @@
 #include "md.h"
 #include "trampolines.h"
 
-/*
- * Define information about this engine.
- */
-/* char* engine_name = "Interpreter"; */
-/* char* engine_version = KVER; */
-
 #define	define_insn(code)	break;					\
 				case code:				\
 				IDBG( dprintf("%03d: %s\n", pc, #code); )
@@ -101,8 +95,6 @@ do {								\
 		ABORT();					\
 	}							\
 } while (0)
-
-void translate(Method *);
 
 static
 void
@@ -160,7 +152,6 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 		}
 	}
 
-	/* Call info and arguments */
 	call->nrargs = i;
 }
 
