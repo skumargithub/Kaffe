@@ -8,6 +8,10 @@
  * of this file. 
  */
 
+#ifndef TRANSLATOR
+#define TRANSLATOR
+#endif
+
 #include "config.h"
 #include "config-std.h"
 #include "config-mem.h"
