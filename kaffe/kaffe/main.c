@@ -61,6 +61,11 @@ main(int argc, char* argv[])
 	java_version = "1.1";
 	vmargs.version = 0x00010001;
 
+    /*
+     * By default JIT the entire code
+     */
+    vmargs.JITstatus = 20;
+
 	JNI_GetDefaultJavaVMInitArgs(&vmargs);
 
 	cp = getenv(CLASSPATH1);
@@ -316,6 +321,18 @@ options(char** argv)
 			prop->key = &argv[i][2];
 			prop->value = &argv[i][sz];
 		}
+        else if(strcmp(argv[i], "-disableJIT") == 0)
+        {
+            vmargs.JITstatus = 10;
+        }
+        else if(strcmp(argv[i], "-mixJIT") == 0)
+        {
+            vmargs.JITstatus = 30;
+        }
+        else if(strcmp(argv[i], "-mixSomeJIT") == 0)
+        {
+            vmargs.JITstatus = 40;
+        }
 		/* The following options are not supported and will be
 		 * ignored for compatibility purposes.
 		 */
@@ -356,6 +373,9 @@ usage(void)
 	fprintf(stderr, "	-verifyremote *		Verify bytecode loaded from network\n");
 	fprintf(stderr, "	-noverify		Do not verify any bytecode\n");
 	fprintf(stderr, "	-D<property>=<value>	Set a property\n");
+	fprintf(stderr, "	-disableJIT     Disable JIT\n");
+	fprintf(stderr, "	-mixJIT         Mix JIT and interpreter\n");
+	fprintf(stderr, "	-mixSomeJIT     Interpret methods in methods.xlt\n");
 	fprintf(stderr, "	-verbosegc		Print message during garbage collection\n");
 	fprintf(stderr, "	-v, -verbose		Be verbose\n");
 	fprintf(stderr, "	-verbosejit		Print message during JIT code generation\n");
