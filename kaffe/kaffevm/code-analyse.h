@@ -209,7 +209,7 @@ typedef struct codeinfo {
 
 struct _methods;
 void verifyMethod(struct _methods*);
-void tidyVerifyMethod(void);
+void tidyVerifyMethod(struct _methods*, bool);
 
 extern codeinfo* codeInfo;
 extern const uint8 insnLen[];

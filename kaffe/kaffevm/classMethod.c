@@ -435,6 +435,7 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
     mt->stats.numSwitch = 0;
     mt->stats.numExit = 0;
     mt->stats.timeTranslate = 0;
+    mt->codeInfo = 0;
 
 	/* Mark constructors as such */
 	if (equalUtf8Consts (name, constructor_name)) {

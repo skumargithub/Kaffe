@@ -119,6 +119,8 @@ typedef struct _statInfo
     u2  flags;
 } statInfo;
 
+struct codeinfo;
+
 typedef struct _methods {
 	Utf8Const*		name;
 	Utf8Const*		signature;
@@ -127,6 +129,7 @@ typedef struct _methods {
 	u2			stacksz;
 	u2			localsz;
     statInfo    stats;
+    struct codeinfo*   codeInfo;
 	nativecode*		ncode;	/* Must be here for trampolines */
 	union {
 	  struct {

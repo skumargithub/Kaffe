@@ -272,7 +272,7 @@ DBG(JIT,	dprintf("pc = %d, npc = %d\n", pc, npc);	)
     END_TIMER(meth->stats.timeTranslate);
 
     BEGIN_TIMER();
-	tidyVerifyMethod();
+	tidyVerifyMethod(meth, true);
     END_TIMER(verify2);
 
     meth->stats.timeVerify = verify1 + verify2;

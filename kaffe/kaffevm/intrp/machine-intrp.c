@@ -320,7 +320,11 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 	if ((methaccflags & ACC_VERIFIED) == 0) {
         BEGIN_TIMER();
 		verifyMethod(meth);
-		tidyVerifyMethod();
+
+        /*
+         * Only in mixJIT mode do we not free the memory
+         */
+		tidyVerifyMethod(meth, !(Kaffe_JavaVMArgs[0].JITstatus == 30));
         END_TIMER(meth->stats.timeVerify);
 	}
 
