@@ -634,4 +634,5 @@ Thread 6 interation 3:
 	ITL: null"
 
 # All done okay
+rm -f *.class
 exit $overallerror

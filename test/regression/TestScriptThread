@@ -116,4 +116,5 @@ true 1
 main end"
 
 # All done okay
+rm -f *.class
 exit $overallerror
