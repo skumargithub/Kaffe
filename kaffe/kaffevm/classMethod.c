@@ -446,7 +446,9 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
         break;
         
         case 30:
-            assert(0);
+            /*
+             * Apply internal heuristic for JIT compilation
+             */
         break;
 
         case 40:
@@ -454,13 +456,28 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
             /*
              * Interpret only the methods the user specifies
              */
+            static int firstTime = 0;
             int i;
+
+            if(firstTime == 0)
+            {
+                firstTime = 1;
+                readMethodXlt();
+            }
+
             for(i = 0; i < numMethods; i++)
             {
                 if( !strcmp(mt->name->data, methodNames[i]) &&
                     !strcmp(mt->signature->data, methodSigs[i]))
                 {
                     mt->accflags |= ACC_TOINTERPRET;
+
+#if 0
+                    fprintf(stderr,
+                            "Mark interpret \"%s-%s\"\n",
+                            methodNames[i],
+                            methodSigs[i]);
+#endif
 
                     break;
                 }
@@ -978,7 +995,14 @@ buildDispatchTable(Hjava_lang_Class* class)
         {
             if (METHOD_NEEDS_TRAMPOLINE(meth))
             {
-                FILL_IN_TRAMPOLINE(tramp, meth);
+                if(meth->accflags & ACC_TOINTERPRET)
+                {
+                    FILL_IN_INTERPRETER(tramp, meth);
+                }
+                else
+                {
+                    FILL_IN_TRAMPOLINE(tramp, meth);
+                }
                 METHOD_NATIVECODE(meth) = (nativecode*)tramp;
                 tramp++;
             }
