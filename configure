@@ -4936,7 +4936,6 @@ kaffe/scripts/Makefile \
 "
 
 make_output="$make_output \
-libraries/javalib/Makefile \
 libraries/clib/Makefile \
 libraries/clib/native/Makefile \
 libraries/clib/net/Makefile \
@@ -5000,7 +4999,6 @@ nativedir=$datadir/kaffe/lib/$host_cpu-$host_os
 
 
 output="$make_output \
-libraries/javalib/rebuildLib \
 kaffe/scripts/install-jar \
 kaffe/scripts/kaffe \
 kaffe/scripts/javac \
