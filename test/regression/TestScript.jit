@@ -1,0 +1,638 @@
+#! /bin/sh
+#
+# Perform a standard set of test on the Kaffe system.  This script should
+# be built up as we add more test and so, hopefully, avoid re-releasing
+# bugs which have been fixed.
+#
+# Copyright (c) 1996, 1997
+#	Transvirtual Technologies, Inc.  All rights reserved.
+#
+# See the file "license.terms" for information on usage and redistribution 
+# of this file. 
+
+RESULT=/tmp/kaffer.$$
+CHECK=/tmp/kaffec.$$
+JAVA=Kaffe.jit
+JAVAC="Kaffe.jit pizza.compiler.Main"
+overallerror=0
+error=0
+
+# If we have a destination directory, clean it and make sure we use it
+# for later compilations.
+if test "$DESTDIR" != "" ; then
+	rm -f $DESTDIR/*.class
+else
+	DESTDIR="."
+fi
+
+compile()
+{
+	echo ERROR > $RESULT
+	$JAVAC -d $DESTDIR $1.java > $RESULT 2>&1
+	if test "`cat $RESULT`" != "" ; then
+		echo "error compiling"
+		cat $RESULT
+		error=1
+	fi
+	rm -f $RESULT $CHECK
+}
+
+run()
+{
+	echo "$2" > $CHECK
+	echo ERROR > $RESULT
+	(cd $DESTDIR ; $JAVA $1 > $RESULT 2>&1)
+	if cmp -s $RESULT $CHECK ; then
+		:
+	else
+		echo "error running"
+		echo "  Should have got:"
+		cat $CHECK
+		echo "  But got instead:"
+		cat $RESULT
+		error=1
+	fi
+	rm -f $RESULT $CHECK
+}
+
+runtest()
+{
+	error=0
+	echo -n "$1 ... " 1>&2
+	compile $1
+	if test $error = 0 ; then
+		run $1 "$2"
+	fi
+	if test $error = 0 ; then
+		echo "passed" 1>&2
+	else
+		overallerror=1
+	fi
+}
+
+ignoretest()
+{
+	error=0
+	echo "$1 ... ignored" 1>&2
+}
+
+# Simple health check
+cp HelloWorldApp.class.save $DESTDIR/HelloWorldApp.class
+run HelloWorldApp "Hello World!"
+
+# Now test the compiler
+rm -f $DESTDIR/HelloWorldApp.class
+runtest HelloWorldApp "Hello World!"
+
+# Test ints, longs, floats and doubles
+runtest TestIntLong "Some mathmatical tests
+Results Good"
+ignoretest TestFloatDouble "Some mathmatical tests
+Results Good"
+
+# Test strings
+runtest Str "12abcd34567890"
+runtest Str2 "12"
+
+# Test exceptions
+runtest IndexTest "0
+1
+2
+3
+4
+5
+Catch
+java.lang.ArrayIndexOutOfBoundsException
+	at IndexTest.main(7)"
+runtest StackDump "java.lang.NullPointerException
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.f(8)
+	at StackDump.main(14)"
+
+# Test threads
+runtest tname "Hello, my name is main"
+runtest ttest "run 0
+run 1
+run 2
+run 3
+run 4
+run 5
+run 6
+run 7
+run 8
+run 9
+run 10
+run 11
+run 12
+run 13
+run 14
+run 15
+run 16
+run 17
+run 18
+run 19
+run 20
+run 21
+run 22
+run 23
+run 24
+run 25
+run 26
+run 27
+run 28
+run 29
+run 30
+run 31
+run 32
+run 33
+run 34
+run 35
+run 36
+run 37
+run 38
+run 39
+run 40
+run 41
+run 42
+run 43
+run 44
+run 45
+run 46
+run 47
+run 48
+run 49
+run 50
+run 51
+run 52
+run 53
+run 54
+run 55
+run 56
+run 57
+run 58
+run 59
+run 60
+run 61
+run 62
+run 63
+run 64
+run 65
+run 66
+run 67
+run 68
+run 69
+run 70
+run 71
+run 72
+run 73
+run 74
+run 75
+run 76
+run 77
+run 78
+run 79
+run 80
+run 81
+run 82
+run 83
+run 84
+run 85
+run 86
+run 87
+run 88
+run 89
+run 90
+run 91
+run 92
+run 93
+run 94
+run 95
+run 96
+run 97
+run 98
+run 99
+run 0
+run 1
+run 2
+run 3
+run 4
+run 5
+run 6
+run 7
+run 8
+run 9
+run 10
+run 11
+run 12
+run 13
+run 14
+run 15
+run 16
+run 17
+run 18
+run 19
+run 20
+run 21
+run 22
+run 23
+run 24
+run 25
+run 26
+run 27
+run 28
+run 29
+run 30
+run 31
+run 32
+run 33
+run 34
+run 35
+run 36
+run 37
+run 38
+run 39
+run 40
+run 41
+run 42
+run 43
+run 44
+run 45
+run 46
+run 47
+run 48
+run 49
+run 50
+run 51
+run 52
+run 53
+run 54
+run 55
+run 56
+run 57
+run 58
+run 59
+run 60
+run 61
+run 62
+run 63
+run 64
+run 65
+run 66
+run 67
+run 68
+run 69
+run 70
+run 71
+run 72
+run 73
+run 74
+run 75
+run 76
+run 77
+run 78
+run 79
+run 80
+run 81
+run 82
+run 83
+run 84
+run 85
+run 86
+run 87
+run 88
+run 89
+run 90
+run 91
+run 92
+run 93
+run 94
+run 95
+run 96
+run 97
+run 98
+run 99"
+
+runtest ReflectInterfaces 'null
+all methods
+public abstract void ReflectInterfaces$If2.if2MethodNP()
+public abstract void ReflectInterfaces$If2.if2Method()
+public abstract void ReflectInterfaces$If1.if1MethodNP()
+public abstract void ReflectInterfaces$If1.if1Method()
+declared methods
+public abstract void ReflectInterfaces$If2.if2MethodNP()
+public abstract void ReflectInterfaces$If2.if2Method()'
+
+runtest TestSerializable "0
+1041
+true
+true
+false
+true
+false
+true"
+
+runtest NullPointerTest "This is Perfect"
+
+runtest burford "Starting burford...
+Starting feeders...
+Feeders completed...
+burford awakened -- result = 100"
+
+runtest IllegalInterface "Exception caught: java.lang.InstantiationException: Illegalif"
+
+runtest GetInterfaces "Hello world!
+interface0: if0
+interface1: if1"
+
+runtest DeadThread "1 true
+true 1"
+
+runtest SignedShort "-1"
+
+runtest CharCvt "65535
+-1"
+
+runtest BadFloatTest "1.2345 9.8765"
+
+runtest ExecTest "Okay
+Okay"
+
+runtest ProcessTest "ProcessTest: Success."
+runtest UDPTest "UDPTest: Success."
+
+runtest finaltest "3.1415926536"
+echo -n "finaltest2 ... " 1>&2
+compile finaltest2
+if test $error = 0 ; then
+	run finaltest "3.1415926536"
+fi
+if test $error = 0 ; then
+	echo "passed" 1>&2
+else
+	overallerror=1
+fi
+
+runtest forNameTest "constructor called"
+runtest KaffeVerifyBug "okay"
+runtest Schtum "Okay"
+
+runtest tthrd1 "main start
+true 1
+main end"
+
+runtest Reflect "Method: public static native int java.lang.System.identityHashCode(java.lang.Object)
+Method: public static native void java.lang.System.arraycopy(java.lang.Object,int,java.lang.Object,int,int)
+Method: public static native long java.lang.System.currentTimeMillis()
+Method: public static void java.lang.System.setSecurityManager(java.lang.SecurityManager)
+Method: public static void java.lang.System.setProperties(java.util.Properties)
+Method: public static void java.lang.System.setOut(java.io.PrintStream)
+Method: public static void java.lang.System.setIn(java.io.InputStream)
+Method: public static void java.lang.System.setErr(java.io.PrintStream)
+Method: public static void java.lang.System.runFinalizersOnExit(boolean)
+Method: public static void java.lang.System.runFinalization()
+Method: public static void java.lang.System.loadLibrary(java.lang.String)
+Method: public static void java.lang.System.load(java.lang.String)
+Method: public static java.lang.String java.lang.System.getenv(java.lang.String)
+Method: public static java.lang.SecurityManager java.lang.System.getSecurityManager()
+Method: public static java.lang.String java.lang.System.getProperty(java.lang.String,java.lang.String)
+Method: public static java.lang.String java.lang.System.getProperty(java.lang.String)
+Method: public static java.util.Properties java.lang.System.getProperties()
+Method: public static void java.lang.System.gc()
+Method: public static void java.lang.System.exit(int)
+Method: public final void java.lang.Object.wait(long) throws java.lang.InterruptedException
+Method: public final void java.lang.Object.wait() throws java.lang.InterruptedException
+Method: public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+Method: public java.lang.String java.lang.Object.toString()
+Method: public boolean java.lang.Object.equals(java.lang.Object)
+Method: public final native void java.lang.Object.notifyAll()
+Method: public final native void java.lang.Object.notify()
+Method: public native int java.lang.Object.hashCode()
+Method: public final native java.lang.Class java.lang.Object.getClass()
+Constructor: public java.lang.System()
+Field: public static java.io.PrintStream java.lang.System.err
+Field: public static java.io.PrintStream java.lang.System.out
+Field: public static java.io.InputStream java.lang.System.in"
+
+runtest Bean "BeanDescriptor:
+  Class: Bean
+  Method: public void Bean.setArray(java.lang.String[])
+  Method: public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+  Method: public final void java.lang.Object.wait() throws java.lang.InterruptedException
+  Method: public void Bean.setArray(int,java.lang.String)
+  Method: public boolean java.lang.Object.equals(java.lang.Object)
+  Method: public final native void java.lang.Object.notifyAll()
+  Method: public void Bean.setValue(java.lang.String)
+  Method: public java.lang.String[] Bean.getArray()
+  Method: public final native java.lang.Class java.lang.Object.getClass()
+  Method: public java.lang.String Bean.getValue()
+  Method: public java.lang.String Bean.getArray(int)
+  Method: public final void java.lang.Object.wait(long) throws java.lang.InterruptedException
+  Method: public native int java.lang.Object.hashCode()
+  Method: public static void Bean.main(java.lang.String[])
+  Method: public java.lang.String java.lang.Object.toString()
+  Method: public final native void java.lang.Object.notify()
+  Property: type java.lang.Class, read public final native java.lang.Class java.lang.Object.getClass(), write <none>
+  Editor: <unknown>
+  Property: type java.lang.String[], read public java.lang.String[] Bean.getArray(), write public void Bean.setArray(java.lang.String[]), idx read public java.lang.String Bean.getArray(int), idx write public void Bean.setArray(int,java.lang.String)
+  Editor: <unknown>
+  Property: type java.lang.String, read public java.lang.String Bean.getValue(), write public void Bean.setValue(java.lang.String)
+  Editor: kaffe.beans.editors.StringEditor"
+
+#
+# simple test for Method.invoke
+#
+runtest ReflectInvoke "2
+8"
+
+#
+# simple test for InvocationTargetExceptions
+#
+runtest InvTarExcTest "Caught itexception: null
+java.lang.reflect.InvocationTargetException
+	at InvTarExcTest.main(13)
+Target is: throwing inner exception"
+
+#
+# simple test for ClassLoader
+# this test must be compiled with 'nowarn' because it uses a
+# deprecated API (defineClass with 3 params)
+#
+OLDJAVAC=$JAVAC
+JAVAC="$OLDJAVAC -nowarn"
+
+# compile the example class
+compile Hello
+
+runtest CLTest "Load returned class -Hello-
+Trying to create new instance
+Hello World
+Trying same file under different name
+Duplicate name
+Trying file with wrong name
+Wrong name
+Now second load attempt for a
+Duplicate name
+Done."
+
+# restore JAVAC
+JAVAC=$OLDJAVAC
+
+# end of CLTest test
+
+#
+# this test must have its output sorted, because it is multi-threaded.
+# we do this by temporarily replacing JAVA with a routine that invokes
+# $JAVA, but pipes the output through sort
+#
+
+# save old JAVA
+OLDJAVA=$JAVA
+
+run_and_sort()
+{
+	$OLDJAVA $@ | sort
+}
+
+JAVA=run_and_sort
+
+runtest GCTest "[0]:  Success
+[10]:  Success
+[11]:  Success
+[12]:  Success
+[13]:  Success
+[14]:  Success
+[15]:  Success
+[16]:  Success
+[17]:  Success
+[18]:  Success
+[19]:  Success
+[1]:  Success
+[20]:  Success
+[21]:  Success
+[22]:  Success
+[23]:  Success
+[24]:  Success
+[25]:  Success
+[26]:  Success
+[27]:  Success
+[28]:  Success
+[29]:  Success
+[2]:  Success
+[30]:  Success
+[31]:  Success
+[32]:  Success
+[33]:  Success
+[34]:  Success
+[35]:  Success
+[36]:  Success
+[37]:  Success
+[38]:  Success
+[39]:  Success
+[3]:  Success
+[40]:  Success
+[41]:  Success
+[42]:  Success
+[43]:  Success
+[44]:  Success
+[4]:  Success
+[5]:  Success
+[6]:  Success
+[7]:  Success
+[8]:  Success
+[9]:  Success"
+
+# restore JAVA
+JAVA=$OLDJAVA
+
+# end of GCTest test
+
+# ThreadLocalTest
+runtest ThreadLocalTest "Thread 1 interation 0:
+	 TL:  TL initial
+	ITL: ITL initial
+Thread 2 interation 0:
+	 TL:  TL initial
+	ITL: ITL initial
+Thread 1 interation 1:
+	 TL:  TL initial changed by 1 at k == 0
+	ITL: null
+	Creating new thread 3
+	Creating new thread 4
+Thread 2 interation 1:
+	 TL:  TL initial changed by 2 at k == 0
+	ITL: null
+Thread 1 interation 2:
+	 TL:  TL initial changed by 1 at k == 0 changed by 1 at k == 1
+	ITL: set by 1 at k == 1
+Thread 3 interation 0:
+	 TL:  TL initial
+	ITL: null inherited from 1
+Thread 4 interation 0:
+	 TL:  TL initial
+	ITL: null inherited from 1
+Thread 2 interation 2:
+	 TL:  TL initial changed by 2 at k == 0 changed by 2 at k == 1
+	ITL: set by 2 at k == 1
+	Creating new thread 5
+	Creating new thread 6
+Thread 1 interation 3:
+	 TL:  TL initial changed by 1 at k == 0 changed by 1 at k == 1 changed by 1 at k == 2
+	ITL: null
+Thread 3 interation 1:
+	 TL:  TL initial changed by 3 at k == 0
+	ITL: null
+Thread 4 interation 1:
+	 TL:  TL initial changed by 4 at k == 0
+	ITL: null
+Thread 2 interation 3:
+	 TL:  TL initial changed by 2 at k == 0 changed by 2 at k == 1 changed by 2 at k == 2
+	ITL: null
+Thread 5 interation 0:
+	 TL:  TL initial
+	ITL: set by 2 at k == 1 inherited from 2
+Thread 6 interation 0:
+	 TL:  TL initial
+	ITL: set by 2 at k == 1 inherited from 2
+Thread 3 interation 2:
+	 TL:  TL initial changed by 3 at k == 0 changed by 3 at k == 1
+	ITL: set by 3 at k == 1
+Thread 4 interation 2:
+	 TL:  TL initial changed by 4 at k == 0 changed by 4 at k == 1
+	ITL: set by 4 at k == 1
+Thread 5 interation 1:
+	 TL:  TL initial changed by 5 at k == 0
+	ITL: null
+Thread 6 interation 1:
+	 TL:  TL initial changed by 6 at k == 0
+	ITL: null
+Thread 3 interation 3:
+	 TL:  TL initial changed by 3 at k == 0 changed by 3 at k == 1 changed by 3 at k == 2
+	ITL: null
+Thread 4 interation 3:
+	 TL:  TL initial changed by 4 at k == 0 changed by 4 at k == 1 changed by 4 at k == 2
+	ITL: null
+Thread 5 interation 2:
+	 TL:  TL initial changed by 5 at k == 0 changed by 5 at k == 1
+	ITL: set by 5 at k == 1
+Thread 6 interation 2:
+	 TL:  TL initial changed by 6 at k == 0 changed by 6 at k == 1
+	ITL: set by 6 at k == 1
+Thread 5 interation 3:
+	 TL:  TL initial changed by 5 at k == 0 changed by 5 at k == 1 changed by 5 at k == 2
+	ITL: null
+Thread 6 interation 3:
+	 TL:  TL initial changed by 6 at k == 0 changed by 6 at k == 1 changed by 6 at k == 2
+	ITL: null"
+
+# All done okay
+rm -f *.class
+exit $overallerror
