@@ -36,7 +36,7 @@
 #include "locks.h"
 #include "md.h"
 #include "exception.h"
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 #include "seq.h"
 #include "slots-jit.h"
 #include "labels.h"
@@ -47,7 +47,7 @@
 extern int maxArgs;
 extern int isStatic;
 extern int maxTemp;
-#endif
+/* #endif */
 
 /*
  * Define the version of JNI we support.
@@ -3451,7 +3451,7 @@ strcatJNI(char* to, char* from)
 	*ptr = 0;
 }
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 /*
  * Wrap up a native function in a calling wrapper.
  */
@@ -3465,6 +3465,17 @@ Kaffe_JNI_wrapper(Method* xmeth, void* func)
 	int count;
 	nativeCodeInfo ncode;
 	SlotInfo* tmp;
+
+    if(xmeth->accflags & ACC_TOINTERPRET)
+    {
+        /*
+         * If this method has the interpret flag on it
+         */
+        SET_METHOD_NATIVECODE(xmeth, func);
+        xmeth->accflags |= ACC_JNI;
+
+        return;
+    }
 
 	/* Convert the signature into a simple string of types, and
 	 * count the size of the arguments too.
@@ -3682,8 +3693,9 @@ Kaffe_JNI_wrapper(Method* xmeth, void* func)
 
 	xmeth->accflags |= ACC_JNI;
 }
-#endif
-#if defined(INTERPRETER)
+/* #endif */
+#if 0
+/* #if defined(__INTERPRETER__) */
 /*
  * Wrap up a native function in a calling wrapper.  The interpreter
  * lets the callMethod[AV] macros functions handle the JNI specifics.
@@ -3695,7 +3707,8 @@ Kaffe_JNI_wrapper(Method* xmeth, void* func)
 	SET_METHOD_NATIVECODE(xmeth, func);
 	xmeth->accflags |= ACC_JNI;
 }
-#endif /* INTERPRETER */
+#endif
+/* #endif */  /* INTERPRETER */
 
 /* #if defined(__TRANSLATOR__) */
 static
