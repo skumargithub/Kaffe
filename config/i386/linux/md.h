@@ -15,9 +15,9 @@
 #include "i386/common.h"
 #include "i386/threads.h"
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 #include "jit-md.h"
-#endif
+/* #endif */
 
 void init_md(void);
 
