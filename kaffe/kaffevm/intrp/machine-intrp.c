@@ -220,6 +220,8 @@ virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thr
 	fieldInfo finfo;
 	Hjava_lang_Class* crinfo;
 
+    callMethodInfo cM;
+
 CDBG(	dprintf("Call: %s.%s%s.\n", meth->class->name->data, meth->name->data, meth->signature->data); )
 
 	/* If this is native, then call the real function */
@@ -258,7 +260,9 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
     mjbuf.retpc = 0;
     __asm__ __volatile__ ("       \n\
         movl %%ebp, %0          \n\
-    "   :   "=g" (mjbuf.retbp));
+    "   :   "=g" (mjbuf.retbp)
+        :
+        : "memory" );
 
 	if (tid != NULL && unhand(tid)->PrivateInfo != 0) {
 		mjbuf.prev = (vmException*)unhand(tid)->exceptPtr;
@@ -309,8 +313,12 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 		npc = pc + insnLen[code[pc]];
 
 		switch (code[pc]) {
+		default:
+			fprintf(stderr, "Unknown bytecode %d\n", code[pc]);
+			throwException(VerifyError);
+			break;
+
 case INVOKEVIRTUAL:
-{
 	/*
 	 * ..., obj, ..args.., -> ...
 	 */
@@ -363,6 +371,8 @@ case INVOKEVIRTUAL:
         else
         {
             assert(0);
+            intrp_to_jit(tmp[0].v.taddr, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            sysdepCallMethod(&cM);
         }
 
 		/* Pop args */
@@ -371,7 +381,6 @@ case INVOKEVIRTUAL:
 		start_sub_block();
 		METHOD_RETURN_VALUE();
 	}
-}
 break;
 
 case INVOKESPECIAL:
@@ -420,6 +429,8 @@ case INVOKESPECIAL:
         else
         {
             assert(0);
+            intrp_to_jit(cinfo.method, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            sysdepCallMethod(&cM);
         }
 
 		/* Pop args */
@@ -469,6 +480,8 @@ case INVOKESTATIC:
         else
         {
             assert(0);
+            intrp_to_jit(cinfo.method, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            sysdepCallMethod(&cM);
         }
 
 		/* Pop args */
@@ -529,6 +542,8 @@ case INVOKEINTERFACE:
         else
         {
             assert(0);
+            intrp_to_jit(tmp[0].v.taddr, (jvalue*) sp+1, (jvalue*) retval, &cM);
+            sysdepCallMethod(&cM);
         }
 
 		/* Pop args */
@@ -540,10 +555,6 @@ case INVOKEINTERFACE:
 }
 break;
 
-		default:
-			fprintf(stderr, "Unknown bytecode %d\n", code[pc]);
-			throwException(VerifyError);
-			break;
 #include "kaffe.intrp.def"
 		}
 	}
