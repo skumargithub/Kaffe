@@ -33,6 +33,25 @@
 #include "md.h"
 #include "stackTrace.h"
 
+vmException *
+isIntrpFrame(uintp ebp)
+{
+    vmException *e = (vmException*)
+        unhand(Kaffe_ThreadInterface.currentJava())->exceptPtr;
+
+    while(e != NULL)
+    {
+        if(e->retbp == ebp)
+        {
+            return e;
+        }
+
+        e = e->prev;
+    }
+
+    return NULL;
+}
+
 Hjava_lang_Object*
 buildStackTrace(struct _exceptionFrame* base)
 {
@@ -47,12 +66,22 @@ buildStackTrace(struct _exceptionFrame* base)
             /*
              * Pure Interpreter
              */
-            vmException *e = (vmException*)
-                unhand(Kaffe_ThreadInterface.currentJava())->exceptPtr;
+            exceptionFrame* v = (exceptionFrame*) (((uintp)&(base))-8);
+            vmException *vm;
 
-            while(!(e == 0 || e->meth == (Method*) 1)) {
-                e = Kaffe_ThreadInterface.nextFrame(e);
-                cnt++;
+            while(v != 0)
+            {
+                if((vm = isIntrpFrame(v->retbp)) != NULL)
+                {
+                    if(vm->meth == (Method*) 1)
+                    {
+                        break;
+                    }
+
+                    cnt++;
+                }
+
+                v = Kaffe_ThreadInterface.nextFrame(v);
             }
         }
         break;
@@ -69,6 +98,7 @@ buildStackTrace(struct _exceptionFrame* base)
             }
             else
             {
+                assert(0);
                 e = base;
             }
 
@@ -103,14 +133,24 @@ buildStackTrace(struct _exceptionFrame* base)
             /*
              * Pure Interpreter
              */
-            vmException *e = (vmException*)
-                unhand(Kaffe_ThreadInterface.currentJava())->exceptPtr;
+            exceptionFrame* v = (exceptionFrame*) (((uintp)&(base))-8);
+            vmException *vm;
 
-            for(; !(e == 0 || e->meth == (Method*) 1);
-                e = Kaffe_ThreadInterface.nextFrame(e)) {
-                info[cnt].pc = e->pc;
-                info[cnt].meth = e->meth;
-                cnt++;
+            while(v != 0)
+            {
+                if((vm = isIntrpFrame(v->retbp)) != NULL)
+                {
+                    if(vm->meth == (Method*) 1)
+                    {
+                        break;
+                    }
+
+                    info[cnt].pc = vm->pc;
+                    info[cnt].meth = vm->meth;
+                    cnt++;
+                }
+
+                v = Kaffe_ThreadInterface.nextFrame(v);
             }
         }
         break;
@@ -127,6 +167,7 @@ buildStackTrace(struct _exceptionFrame* base)
             }
             else
             {
+                assert(0);
                 e = base;
             }
 
