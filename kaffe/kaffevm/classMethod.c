@@ -244,7 +244,7 @@ SDBG(		dprintf("Initialising %s static %d\n", class->name->data,
 			CLASS_FSIZE(class)); 	)
 		meth = findMethodLocal(class, init_name, void_signature);
 		if (meth != NULL) {
-			callMethodA(meth, METHOD_INDIRECTMETHOD(meth), 0, 0, 0);
+			callMethodA(meth, meth, 0, 0, 0);
 			/* Since we'll never run this again we might as well
 			 * loose it now.
 			 */
