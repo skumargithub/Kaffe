@@ -213,7 +213,9 @@ callMethodA(Method* meth, void* func, void* obj, jvalue* args, jvalue* ret)
 	i = 0;
 	s = 0;
 
-#if defined(INTERPRETER)
+/* #if defined(__INTERPRETER__) */
+if(meth->accflags & ACC_TOINTERPRET)
+{
 	/*
 	 * If the method is native, we must find it so that we know whether
 	 * it is a JNI method or not.  If it is one, ACC_JNI will be set
@@ -247,7 +249,8 @@ callMethodA(Method* meth, void* func, void* obj, jvalue* args, jvalue* ret)
 			args--; /* because args[i] would be off by one */
 		}
 	} 
-#endif
+}
+/* #endif */
 
 	/* If this method isn't static, we must insert the object as
 	 * an argument.
@@ -394,7 +397,9 @@ callMethodV(Method* meth, void* func, void* obj, va_list args, jvalue* ret)
 	i = 0;
 	s = 0;
 
-#if defined(INTERPRETER)
+/* #if defined(__INTERPRETER__) */
+if(meth->accflags & ACC_TOINTERPRET)
+{
 	meth = (Method*)func;
 	if (meth->accflags & ACC_NATIVE) {
                 if (METHOD_NATIVECODE(meth) == 0) {
@@ -422,7 +427,8 @@ callMethodV(Method* meth, void* func, void* obj, va_list args, jvalue* ret)
 			i++;
 		}
 	}
-#endif
+}
+/* #endif */
 
 	/* If this method isn't static, we must insert the object as
 	 * the first argument and get the function code.
