@@ -228,27 +228,50 @@ static
 void*   
 TnextFrame(void* fm)
 {
-#if defined(TRANSLATOR)
-        exceptionFrame* nfm;
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+        {
+            /*
+             * Pure interpreter
+             */
+            vmException* nfm; 
+            nfm = ((vmException*)fm)->prev;
+            if (nfm != 0 && nfm->meth != (Method*)1) {
+                    return (nfm);
+            }
+        }
+        break;
 
-        nfm = (exceptionFrame*)(((exceptionFrame*)fm)->retbp);
-	/* Note: this should obsolete the FRAMEOKAY macro */
-        if (nfm && jthread_on_current_stack((void *)nfm->retbp)) {
-                return (nfm);
+        case 20:
+        {
+            /*
+             * Pure JIT
+             */
+            exceptionFrame* nfm;
+
+            nfm = (exceptionFrame*)(((exceptionFrame*)fm)->retbp);
+            /* Note: this should obsolete the FRAMEOKAY macro */
+            if (nfm && jthread_on_current_stack((void *)nfm->retbp)) {
+                    return (nfm);
+            }
         }
-        else {
-                return (0);
-        }
-#else
-        vmException* nfm; 
-        nfm = ((vmException*)fm)->prev;
-        if (nfm != 0 && nfm->meth != (Method*)1) {
-                return (nfm);
-        }
-        else {
-                return (0);
-        }
-#endif 
+        break;
+        
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
+
+    return NULL;
 }
 
 /*
