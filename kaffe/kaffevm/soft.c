@@ -34,6 +34,7 @@
 #include "thread.h"
 #include "baseClasses.h"
 #include "itypes.h"
+#include "trampolines.h"
 /* #include "machine.h" */
 
 /*
@@ -423,7 +424,7 @@ soft_initialise_class(Hjava_lang_Class* c)
 	}
 }
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 /*
  * Trampolines come in here - do the translation and replace the trampoline.
  */
@@ -464,7 +465,7 @@ TDBG(	fprintf(stderr, "Calling %s:%s%s @ 0x%x\n", meth->class->name->data, meth-
 
 	return (METHOD_NATIVECODE(meth));
 }
-#endif
+/* #endif */
 
 /*
  * Check we can store 'obj' into the 'array'.
