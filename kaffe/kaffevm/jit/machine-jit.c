@@ -355,7 +355,7 @@ installMethodCode(Method* meth, nativeCodeInfo* code)
 	/* Translate line numbers table */
 	if (meth->lines != 0) {
 		for (i = 0; i < meth->lines->length; i++) {
-			meth->lines->entry[i].start_pc = INSNPC(meth->lines->entry[i].start_pc) + (uintp)code->code;
+			meth->lines->entry[i].Jstart_pc = INSNPC(meth->lines->entry[i].start_pc) + (uintp)code->code;
 		}
 	}
 }

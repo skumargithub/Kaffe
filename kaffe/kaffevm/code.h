@@ -29,6 +29,7 @@ typedef struct _Code {
 typedef struct _lineNumberEntry {
 	uint16			line_nr;
 	uintp			start_pc;
+	uintp			Jstart_pc;
 } lineNumberEntry;
 
 typedef struct _lineNumbers {

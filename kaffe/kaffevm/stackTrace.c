@@ -150,6 +150,7 @@ buildStackTrace(struct _exceptionFrame* baseframe)
                         break;
                     }
 
+                    info[cnt].isJIT = false;
                     info[cnt].pc = v->pc;
                     info[cnt].meth = v->meth;
                     cnt++;
@@ -166,6 +167,7 @@ buildStackTrace(struct _exceptionFrame* baseframe)
              * Pure JIT
              */
             for(; e != 0; e = Kaffe_ThreadInterface.nextFrame(e)) {
+                info[cnt].isJIT = true;
                 info[cnt].pc = PCFRAME(e);
                 info[cnt].meth = findMethodFromPC(PCFRAME(e));
                 cnt++;
@@ -188,11 +190,13 @@ buildStackTrace(struct _exceptionFrame* baseframe)
                         break;
                     }
 
+                    info[cnt].isJIT = false;
                     info[cnt].pc = v->pc;
                     info[cnt].meth = v->meth;
                 }
                 else
                 {
+                    info[cnt].isJIT = true;
                     info[cnt].pc = PCFRAME(e);
                     info[cnt].meth = findMethodFromPC(PCFRAME(e));
                 }
@@ -208,6 +212,7 @@ buildStackTrace(struct _exceptionFrame* baseframe)
         break;
     }
 
+    info[cnt].isJIT = false;
 	info[cnt].pc = 0;
 	info[cnt].meth = ENDOFSTACK;
 
@@ -221,6 +226,7 @@ printStackTrace(struct Hjava_lang_Throwable* o, struct Hjava_lang_Object* p)
 	stackTraceInfo* info;
 	Method* meth;
 	uintp pc;
+    bool isJIT;
 	int32 linenr;
 	uintp linepc;
 	char buf[200];
@@ -236,6 +242,7 @@ printStackTrace(struct Hjava_lang_Throwable* o, struct Hjava_lang_Object* p)
 	for (i = 0; info[i].meth != ENDOFSTACK; i++) {
 		pc = info[i].pc;
 		meth = info[i].meth; 
+		isJIT = info[i].isJIT; 
 		if (meth != 0) {
 			linepc = 0;
 			linenr = -1;
@@ -243,7 +250,14 @@ printStackTrace(struct Hjava_lang_Throwable* o, struct Hjava_lang_Object* p)
 				for (j = 0; j < meth->lines->length; j++) {
 					if (pc >= meth->lines->entry[j].start_pc && linepc < meth->lines->entry[j].start_pc) {
 						linenr = meth->lines->entry[j].line_nr;
-						linepc = meth->lines->entry[j].start_pc;
+                        if(isJIT)
+                        {
+                            linepc = meth->lines->entry[j].Jstart_pc;
+                        }
+                        else
+                        {
+                            linepc = meth->lines->entry[j].start_pc;
+                        }
 					}
 				}
 			}

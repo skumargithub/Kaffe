@@ -17,6 +17,7 @@ struct _methods;
 
 typedef struct _stackTraceInfo {
 	uintp   pc;
+    int     isJIT;
 	struct _methods* meth;
 } stackTraceInfo;
 
