@@ -1,1 +1,1 @@
-kaffe -jar TextEdit.jar $*
+Kaffe.jit -jar TextEdit.jar
