@@ -33,20 +33,6 @@
 #include "locks.h"
 #include "stackTrace.h"
 
-#if 0
-#if defined(INTERPRETER)
-#define	DEFINEFRAME()		/* Does nothing */
-#define	FIRSTFRAME(f, e)	/* Does nothing */
-#define	DISPATCHFRAME(e)	dispatchException((Hjava_lang_Throwable*)(e), 0)
-#define	EXCEPTIONPROTO		int sig
-#define	EXCEPTIONFRAME(f, c)	/* Does nothing */
-#define	EXCEPTIONFRAMEPTR	0
-#elif defined(TRANSLATOR)
-#define	DEFINEFRAME()		exceptionFrame frame
-#define	DISPATCHFRAME(e)	dispatchException((Hjava_lang_Throwable*)(e), &frame)
-#define	EXCEPTIONFRAMEPTR	&frame
-#endif
-#endif
 #define	GETNEXTFRAME(F)		((*Kaffe_ThreadInterface.nextFrame)(F))
 
 static void nullException(EXCEPTIONPROTO);

@@ -1736,17 +1736,6 @@ define_insn(TABLESWITCH)
 	branch_indirect(table_code_label(stack(0)));
 	pop(1);
 
-#if defined(TRANSLATOR)
-	{
-		build_code_ref(&getcode(npc-12), pc);	/* Default entry */
-		build_code_ref(&getcode(npc-12), pc);	/* Dummy */
-		build_code_ref(&getcode(npc-12), pc);	/* Dummy */
-		set_label(TABLESWITCH, 9);
-		for (idx = 0; idx < high-low+1; idx++) {
-			build_code_ref(&getcode(npc + (idx << switchtable_shift)), pc);
-		}
-	}
-#endif
 	adjustpc((4 - (pc % 4)) + 12 + (high - low + 1) * 4);
 }
 
@@ -1793,17 +1782,6 @@ define_insn(LOOKUPSWITCH)
 	branch_indirect(table_code_label(tmp));
 	pop(1);
 
-#if defined(TRANSLATOR)
-	{
-		set_label(LOOKUPSWITCH, 7);
-		build_code_ref(&getcode(npc), pc);
-		build_key(&getcode(npc)); /* Dummy key */
-		for (low = 1; low <= idx; low++) {
-			build_key(&getcode(npc + (low * switchpair_size)));
-			build_code_ref(&getcode(npc + (low * switchpair_size) + switchpair_addr), pc);
-		}
-	}
-#endif
 	adjustpc((4 - (pc % 4)) + (idx + 1) * 8);
 }
 
