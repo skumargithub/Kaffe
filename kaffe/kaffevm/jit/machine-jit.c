@@ -7,6 +7,7 @@
  * See the file "license.terms" for information on usage and redistribution 
  * of this file. 
  */
+#define TRANSLATOR
 
 #include "config.h"
 #include "debug.h"
@@ -19,7 +20,7 @@
 #include "registers.h"
 #include "seq.h"
 #include "gc.h"
-#include "machine.h"
+#include "machine-jit.h"
 #include "basecode.h"
 #include "icode.h"
 #include "icode_internal.h"
@@ -239,7 +240,7 @@ DBG(JIT,	dprintf("pc = %d, npc = %d\n", pc, npc);	)
 			unlockStaticMutex(&translatorlock);
 			throwException(VerifyError);
 			break;
-#include "kaffe.def"
+#include "kaffe.jit.def"
 		}
 
 		/* Note maximum number of temp slots used and reset it */
