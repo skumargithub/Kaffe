@@ -833,7 +833,14 @@ esac
 
 link_from="config/$host_cpu/$host_os/md.h config/$host_cpu/$host_os/md.c"
 link_to="config/md.h kaffe/kaffevm/md.c"
-
+link_from="$link_from config/$host_cpu/jit-$host_cpu.def"
+link_to="$link_to kaffe/kaffevm/jit.def"
+link_from="$link_from config/$host_cpu/jit-icode.h"
+link_to="$link_to kaffe/kaffevm/jit/icode-jit.h"
+link_from="$link_from config/$host_cpu/$host_os/jit-md.h"
+link_to="$link_to config/jit-md.h"
+link_from="$link_from config/$host_cpu/trampolines.c"
+link_to="$link_to kaffe/kaffevm/trampolines.c"
 
 
 if test -f $srcdir/config/$host_cpu/$host_os/Make.frag ; then
@@ -867,8 +874,8 @@ fi
 
 
 if test -f $srcdir/config/$host_cpu/$host_os/${with_engine}-md.h ; then
-	link_from="$link_from config/$host_cpu/${with_engine}-$host_cpu.def config/$host_cpu/${with_engine}-icode.h config/$host_cpu/$host_os/${with_engine}-md.h"
-	link_to="$link_to kaffe/kaffevm/jit.def kaffe/kaffevm/jit/icode-jit.h config/jit-md.h"
+#	link_from="$link_from config/$host_cpu/${with_engine}-$host_cpu.def config/$host_cpu/${with_engine}-icode.h config/$host_cpu/$host_os/${with_engine}-md.h"
+#	link_to="$link_to kaffe/kaffevm/jit.def kaffe/kaffevm/jit/icode-jit.h config/jit-md.h"
 	jitsupport=yes
 else
 	with_engine="intrp"
@@ -928,17 +935,17 @@ THREAD_SYSTEM=$with_threads
 echo "$ac_t""$THREAD_SYSTEM" 1>&6
 threads_frag=$srcdir/kaffe/kaffevm/systems/$with_threads/Makefile.frag
 
-if test "$with_engine" != "intrp" ; then
-	echo $ac_n "checking for trampolines""... $ac_c" 1>&6
-echo "configure:934: checking for trampolines" >&5
-	if test -f $srcdir/config/$host_cpu/trampolines.c ; then
-		link_from="$link_from config/$host_cpu/trampolines.c"
-		link_to="$link_to kaffe/kaffevm/trampolines.c"
-		echo "$ac_t""yes" 1>&6
-	else
-		{ echo "configure: error: does not support trampolines - now mandatory" 1>&2; exit 1; }
-	fi
-fi
+#if test "$with_engine" != "intrp" ; then
+#echo $ac_n "checking for trampolines""... $ac_c" 1>&6
+#cho "configure:934: checking for trampolines" >&5
+#if test -f $srcdir/config/$host_cpu/trampolines.c ; then
+#	link_from="$link_from config/$host_cpu/trampolines.c"
+#	link_to="$link_to kaffe/kaffevm/trampolines.c"
+#	echo "$ac_t""yes" 1>&6
+#else
+#	{ echo "configure: error: does not support trampolines - now mandatory" 1>&2; exit 1; }
+#fi
+#fi
 
 
 # Check whether --with-installroot or --without-installroot was given.
