@@ -152,31 +152,40 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 	unhand(ct)->exceptObj = (struct Hkaffe_util_Ptr*)eobj;
 
 	/* Search down exception stack for a match */
-/* #if defined(__INTERPRETER__) */
     if(Kaffe_JavaVMArgs[0].JITstatus == 10)
 	{
+        /*
+         * Pure interpreter
+         */
 		exceptionInfo einfo;
 		vmException* frame;
 		bool res;
 
-		for (frame = (vmException*)unhand(ct)->exceptPtr; frame != 0; frame = frame->prev) {
-
-			if (frame->meth == (Method*)1) {
-                                /* Don't allow JNI to catch thread death
-                                 * exceptions.  Might be bad but its going
-                                 * 1.2 anyway.
-                                 */
-                                if (strcmp(cname, THREADDEATHCLASS) != 0) {
-                                        unhand(ct)->exceptPtr = (struct Hkaffe_util_Ptr*)frame;
-                                        Kaffe_JNIExceptionHandler();
-                                }
+		for(frame = (vmException*)unhand(ct)->exceptPtr;
+            frame != 0; frame = frame->prev)
+        {
+			if(frame->meth == (Method*)1)
+            {
+                /* Don't allow JNI to catch thread death
+                 * exceptions.  Might be bad but its going
+                 * 1.2 anyway.
+                 */
+                if(strcmp(cname, THREADDEATHCLASS) != 0)
+                {
+                    unhand(ct)->exceptPtr = (struct Hkaffe_util_Ptr*)frame;
+                    Kaffe_JNIExceptionHandler();
+                }
 			}
 
 			/* Look for handler */
-			res = findExceptionBlockInMethod(frame->pc, eobj->base.dtable->class, frame->meth, &einfo);
+			res = findExceptionBlockInMethod(   frame->pc,
+                                                eobj->base.dtable->class,
+                                                frame->meth,
+                                                &einfo);
 
 			/* Find the sync. object */
-			if (einfo.method == 0 || (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
+			if( einfo.method == 0 ||
+                (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
 				obj = 0;
 			}
 			else if (einfo.method->accflags & ACC_STATIC) {
@@ -192,35 +201,42 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 				longjmp(frame->jbuf, 1);
 			}
 
-
 			/* If not here, exit monitor if synchronised. */
 			lk = getLock(obj);
-			if (lk != 0 && lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
+			if( lk != 0 &&
+                lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
 				unlockMutex(obj);
 			}
 		}
 	}
     else if(Kaffe_JavaVMArgs[0].JITstatus == 20)
-/* #elif defined(__TRANSLATOR__) */
 	{
+        /*
+         * Pure JIT
+         */
 		exceptionFrame* frame;
 		exceptionInfo einfo;
 
-		for (frame = baseframe; frame != 0; frame = GETNEXTFRAME(frame)) {
+		for(frame = baseframe; frame != 0; frame = GETNEXTFRAME(frame))
+        {
 			findExceptionInMethod(PCFRAME(frame), class, &einfo);
 
-                        if (einfo.method == 0 && PCFRAME(frame) >= Kaffe_JNI_estart && PCFRAME(frame) < Kaffe_JNI_eend) {
-                                /* Don't allow JNI to catch thread death
-                                 * exceptions.  Might be bad but its going
-                                 * 1.2 anyway.
-                                 */
-                                if (strcmp(cname, THREADDEATHCLASS) != 0) {
-                                        Kaffe_JNIExceptionHandler();
-                                }
-                        }
+            if( einfo.method == 0 &&
+                PCFRAME(frame) >= Kaffe_JNI_estart &&
+                PCFRAME(frame) < Kaffe_JNI_eend)
+            {
+                /* Don't allow JNI to catch thread death
+                 * exceptions.  Might be bad but its going
+                 * 1.2 anyway.
+                 */
+                if (strcmp(cname, THREADDEATHCLASS) != 0) {
+                    Kaffe_JNIExceptionHandler();
+                }
+            }
 
 			/* Find the sync. object */
-			if (einfo.method == 0 || (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
+			if( einfo.method == 0 ||
+                (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
 				obj = 0;
 			}
 			else if (einfo.method->accflags & ACC_STATIC) {
@@ -238,7 +254,8 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 
 			/* If method found and synchronised, unlock the lock */
 			lk = getLock(obj);
-			if (lk != 0 && lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
+			if( lk != 0 &&
+                lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
 				unlockMutex(obj);
 			}
 		}
@@ -247,7 +264,6 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
     {
         assert(0);
     }
-/* #endif */
 
 	/* Clear held exception object */
 	unhand(ct)->exceptObj = 0;
@@ -265,7 +281,11 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 	 */
 	if (unhand(ct)->dying == false) {
 		unhand(ct)->dying = true;
-		do_execute_java_method(unhand((*Kaffe_ThreadInterface.currentJava)())->group, "uncaughtException", "(Ljava/lang/Thread;Ljava/lang/Throwable;)V", 0, 0, (*Kaffe_ThreadInterface.currentJava)(), eobj);
+		do_execute_java_method(unhand(
+            (*Kaffe_ThreadInterface.currentJava)())->group,
+            "uncaughtException",
+            "(Ljava/lang/Thread;Ljava/lang/Throwable;)V", 0, 0,
+            (*Kaffe_ThreadInterface.currentJava)(), eobj);
 	}
 	exitThread();
 }
