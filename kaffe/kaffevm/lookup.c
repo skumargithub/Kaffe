@@ -242,7 +242,7 @@ findMethod(Hjava_lang_Class* class, Utf8Const* name, Utf8Const* signature)
 	return (0);
 }
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 /*
  * Find exception in method.
  */
@@ -263,7 +263,7 @@ findExceptionInMethod(uintp pc, Hjava_lang_Class* class, exceptionInfo* info)
 	}
 DBG(ELOOKUP,	dprintf("Exception not found.\n");			)
 }
-#endif
+/* #endif */
 
 /*
  * Look for exception block in method.
