@@ -279,19 +279,6 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
             {
                 findExceptionInMethod(PCFRAME(e), class, &einfo);
 
-                if( einfo.method == 0 &&
-                    PCFRAME(e) >= Kaffe_JNI_estart &&
-                    PCFRAME(e) < Kaffe_JNI_eend)
-                {
-                    /* Don't allow JNI to catch thread death
-                     * exceptions.  Might be bad but its going
-                     * 1.2 anyway.
-                     */
-                    if (strcmp(cname, THREADDEATHCLASS) != 0) {
-                        Kaffe_JNIExceptionHandler();
-                    }
-                }
-
                 /* Find the sync. object */
                 if( einfo.method == 0 ||
                     (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
