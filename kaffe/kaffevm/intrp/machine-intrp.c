@@ -269,7 +269,7 @@ case INVOKEVIRTUAL:
 
 		/* Call it */
 		low = method_returntype();
-		call(tmp);
+		call(((Method*) tmp[0].v.taddr));
 
 		/* Pop args */
 		popargs();
@@ -409,7 +409,7 @@ case INVOKEINTERFACE:
 
 		/* Call it */
 		low = method_returntype();
-		call(tmp);
+		call(((Method*) tmp[0].v.taddr));
 
 		/* Pop args */
 		popargs();
