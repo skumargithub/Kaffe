@@ -875,7 +875,7 @@ finalizeObject(void* ob)
 
 	final = findMethod(OBJECT_CLASS((Hjava_lang_Object*)ob), final_name, void_signature);
 	if (final != 0) {
-		callMethodA(final, METHOD_INDIRECTMETHOD(final), (Hjava_lang_Object*)ob, 0, 0);
+		callMethodA(final, final, (Hjava_lang_Object*)ob, 0, 0);
 	}
 	else {
 		/* This shouldn't happen */
