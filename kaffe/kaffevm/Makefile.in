@@ -102,6 +102,9 @@ $(LIB):		$(OBJECT) lib.exp
 .c$(OBJEXT):
 		$(CC) $(ALL_CFLAGS) -c $(PIC) $< -o $@
 
+machine-intrp.o:
+		$(CC) $(ALL_CFLAGS) -O0 intrp/machine-intrp.c -c $(PIC) $< -o $@
+
 .SUFFIXES: .d
 
 .c.d: 
