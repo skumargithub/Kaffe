@@ -92,6 +92,7 @@ derived-files:
 depend:         $(DEPENDS) external_wrappers.h
 		rm -f .depend
 		cat $(DEPENDS) > .depend
+		rm -f $(DEPENDS)
 
 lib.exp:
 		$(DLLTOOL) --def $(srcdir)/$(LIBNAME).def --output-exp lib.exp --output-lib $(LIBNAME).a --dllname $(LLIB)

@@ -59,5 +59,6 @@ derived-files:
 depend:	$(DEPENDS)
 		rm -f .depend
 		cat $(DEPENDS) > .depend
+		rm -f $(DEPENDS)
 
 @INC_DEPEND@
