@@ -95,21 +95,7 @@ CDBG(	dprintf("verifyMethod: %s.%s, codeInfo = 0x%x\n",
 	meth->class->name->data, meth->name->data, codeInfo);)
 
 	assert (codeInfo == 0 && " Attempt to reenter verifier!");
-
-    if(meth->codeInfo != 0)
-    {
-        /*
-         * This happens in mixJIT mode, the interpreter must
-         * have already setup the info for us, so just return
-         */
-        assert(Kaffe_JavaVMArgs[0].JITstatus == 30);
-
-        codeInfo = meth->codeInfo;
-        return;
-    }
-
 	codeInfo = gc_malloc_fixed(sizeof(codeinfo) + (meth->c.bcode.codelen * sizeof(perPCInfo)));
-    meth->codeInfo = codeInfo;
 
 CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 
@@ -1949,25 +1935,17 @@ mergeFrame(int pc, int sp, frameElement* from, Method* meth)
  * Tidy up after verfication data has been finished with.
  */
 void
-tidyVerifyMethod(Method *meth, bool freeMem)
+tidyVerifyMethod(void)
 {
 	int pc;
 
-    if(freeMem)
-    {
-        codeInfo = meth->codeInfo;
-
-        /* Free the old data */
-        for (pc = 0; pc < codeInfo->codelen; pc++) {
-            if (codeInfo->perPC[pc].frame != 0) {
-                gc_free(codeInfo->perPC[pc].frame);
-            }
-        }
-        gc_free(codeInfo);
-
-        meth->codeInfo = 0;
-    }
-
+	/* Free the old data */
+	for (pc = 0; pc < codeInfo->codelen; pc++) {
+		if (codeInfo->perPC[pc].frame != 0) {
+			gc_free(codeInfo->perPC[pc].frame);
+		}
+	}
+	gc_free(codeInfo);
 	codeInfo = 0;
 	/* now it's safe to unlock the verifier */
 	unlockStaticMutex(&vlock);
