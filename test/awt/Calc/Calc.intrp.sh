@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
 rm -f Calc.class
-Kaffe.intrp -disableJIT pizza.compiler.Main Calc.java
-Kaffe.intrp -disableJIT Calc
+Kaffe -disableJIT pizza.compiler.Main Calc.java
+Kaffe -disableJIT Calc
 rm -f Calc.class

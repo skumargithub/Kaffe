@@ -12,8 +12,8 @@
 
 RESULT=/tmp/kaffer.$$
 CHECK=/tmp/kaffec.$$
-JAVA="Kaffe.intrp -disableJIT"
-JAVAC="Kaffe.intrp -disableJIT pizza.compiler.Main"
+JAVA="Kaffe -disableJIT"
+JAVAC="Kaffe -disableJIT pizza.compiler.Main"
 overallerror=0
 error=0
 

@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
 rm -f Calc.class
-Kaffe.jit pizza.compiler.Main Calc.java
-Kaffe.jit Calc
+Kaffe pizza.compiler.Main Calc.java
+Kaffe Calc
 rm -f Calc.class

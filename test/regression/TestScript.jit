@@ -12,8 +12,8 @@
 
 RESULT=/tmp/kaffer.$$
 CHECK=/tmp/kaffec.$$
-JAVA=Kaffe.jit
-JAVAC="Kaffe.jit pizza.compiler.Main"
+JAVA=Kaffe
+JAVAC="Kaffe pizza.compiler.Main"
 overallerror=0
 error=0
 
