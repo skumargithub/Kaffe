@@ -66,8 +66,17 @@ buildStackTrace(struct _exceptionFrame* base)
             /*
              * Pure Interpreter
              */
-            exceptionFrame* v = (exceptionFrame*) (((uintp)&(base))-8);
+            exceptionFrame* v;
             vmException *vm;
+
+            if(base == NULL)
+            {
+                v = (exceptionFrame*) (((uintp)&(base))-8);
+            }
+            else
+            {
+                v = base;
+            }
 
             while(v != 0)
             {
@@ -98,7 +107,6 @@ buildStackTrace(struct _exceptionFrame* base)
             }
             else
             {
-                assert(0);
                 e = base;
             }
 
@@ -133,8 +141,17 @@ buildStackTrace(struct _exceptionFrame* base)
             /*
              * Pure Interpreter
              */
-            exceptionFrame* v = (exceptionFrame*) (((uintp)&(base))-8);
+            exceptionFrame* v;
             vmException *vm;
+
+            if(base == NULL)
+            {
+                v = (exceptionFrame*) (((uintp)&(base))-8);
+            }
+            else
+            {
+                v = base;
+            }
 
             while(v != 0)
             {
@@ -167,7 +184,6 @@ buildStackTrace(struct _exceptionFrame* base)
             }
             else
             {
-                assert(0);
                 e = base;
             }
 
