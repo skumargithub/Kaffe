@@ -186,6 +186,7 @@ processClass(Hjava_lang_Class* class, int tostate)
 
 		/* This shouldn't be necessary - but it is at the moment!! */
 		class->head.dtable = ClassClass->dtable;
+		class->head.Idtable = ClassClass->Idtable;
 
 		resolveObjectFields(class);
 		resolveStaticFields(class);
@@ -323,6 +324,7 @@ internalSetupClass(Hjava_lang_Class* cl, Utf8Const* name, int flags, int su, Hja
 	CLASS_FSIZE(cl) = 0;
 	cl->accflags = flags;
 	cl->dtable = 0;
+	cl->Idtable = 0;
         cl->interfaces = 0;
 	cl->interface_len = 0;
 	cl->state = CSTATE_LOADED;
@@ -877,6 +879,7 @@ buildDispatchTable(Hjava_lang_Class* class)
 {
 	Method* meth;
 	void** mtab;
+	void** Imtab;
 	int i;
 	int ntramps = 0;
 	methodTrampoline* tramp;
@@ -933,21 +936,27 @@ buildDispatchTable(Hjava_lang_Class* class)
 	   that I didn't want to add another slot on class just for holding
 	   the trampolines, but it also works out for space reasons.  */
 	class->dtable =
-        (dispatchTable*) gc_malloc( sizeof(dispatchTable) +
-                                    class->msize * sizeof(void*) +
+        (dispatchTable*) gc_malloc( 2 * (sizeof(dispatchTable) +
+                                    class->msize * sizeof(void*)) +
                                     ntramps * sizeof(methodTrampoline),
                                     GC_ALLOC_DISPATCHTABLE);
 
-	tramp = (methodTrampoline*) &class->dtable->method[class->msize];
+	class->Idtable = (dispatchTable*) &class->dtable->method[class->msize];
+
+	tramp = (methodTrampoline*) &class->Idtable->method[class->msize];
 
 	class->dtable->class = class;
+	class->Idtable->class = class;
 	mtab = class->dtable->method;
+	Imtab = class->Idtable->method;
 
 	/* Install inherited methods into dispatch table. */
 	if (class->superclass != NULL) {
 		Method** super_mtab = (Method**)class->superclass->dtable->method;
+		Method** Isuper_mtab = (Method**)class->superclass->Idtable->method;
 		for (i = 0; i < class->superclass->msize; i++) {
 			mtab[i] = super_mtab[i];
+			Imtab[i] = Isuper_mtab[i];
 		}
 	}
 
@@ -957,6 +966,7 @@ buildDispatchTable(Hjava_lang_Class* class)
         if(Kaffe_JavaVMArgs[0].JITstatus == 10)
         {
             if (meth->idx >= 0) {
+                Imtab[meth->idx] = meth;
                 mtab[meth->idx] = meth;
             }
         }
@@ -971,10 +981,12 @@ buildDispatchTable(Hjava_lang_Class* class)
 
             if (meth->idx >= 0) {
                 mtab[meth->idx] = METHOD_NATIVECODE(meth);
+                Imtab[meth->idx] = meth;
             }
         }
 	}
 	FLUSH_DCACHE(class->dtable, tramp);
+	FLUSH_DCACHE(class->Idtable, tramp);
 
 	/* Check for undefined abstract methods if class is not abstract.
 	 * See "Java Language Specification" (1996) section 12.3.2. */
@@ -1290,6 +1302,7 @@ lookupArray(Hjava_lang_Class* c)
 	addInterfaces(arr_class, 1, SerialInterface);
 	arr_class->total_interface_len = arr_class->interface_len;
 	arr_class->head.dtable = ClassClass->dtable;
+	arr_class->head.Idtable = ClassClass->Idtable;
 	arr_class->state = CSTATE_OK;
 	arr_class->centry = centry;
 

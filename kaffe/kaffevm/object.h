@@ -29,7 +29,8 @@
 /*
  * These bizzare casts provide various offset into the object structure.
  */
-#define	OBJECT_DTABLE_OFFSET	((int)&(*(Hjava_lang_Object*)0).dtable)
+#define	OBJECT_DTABLE_OFFSET_I	((int)&(*(Hjava_lang_Object*)0).Idtable)
+#define	OBJECT_DTABLE_OFFSET_J	((int)&(*(Hjava_lang_Object*)0).dtable)
 #define	ARRAY_SIZE_OFFSET	((int)&ARRAY_SIZE(0))
 #define	ARRAY_DATA_OFFSET	((int)(((Array*)0)+1))
 

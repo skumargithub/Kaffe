@@ -44,7 +44,7 @@
 			move_ref_const(mtable, cinfo.class->dtable)
 
 #define	method_nargs()		(cinfo.in)
-#define	method_dtable_offset	(OBJECT_DTABLE_OFFSET)
+#define	method_dtable_offset	(OBJECT_DTABLE_OFFSET_J)
 #define	method_returntype()	(cinfo.rettype)
 
 /* -------------------------------------------------------------------- */

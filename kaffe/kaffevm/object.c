@@ -52,6 +52,7 @@ newObject(Hjava_lang_Class* class)
 
         /* Fill in object information */
         obj->dtable = class->dtable;
+        obj->Idtable = class->Idtable;
 
 ADBG(	printf("newObject %x class %s\n", obj,
 		(class ? class->name->data : "<none>"));
@@ -75,6 +76,7 @@ newClass(void)
 
         /* Fill in object information */
 	cls->dtable = ClassClass->dtable;
+	cls->Idtable = ClassClass->Idtable;
 
 ADBG(	printf("newClass %x\n", cls);					)
 
@@ -98,6 +100,7 @@ newArray(Hjava_lang_Class* elclass, int count)
 	}
 	class = lookupArray(elclass);
 	obj->dtable = class->dtable;
+	obj->Idtable = class->Idtable;
 	ARRAY_SIZE(obj) = count;
 	return (obj);
 }

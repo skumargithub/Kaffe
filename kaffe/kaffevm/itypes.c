@@ -38,6 +38,7 @@ initPrimClass(Hjava_lang_Class** class, char* name, char sig, int len)
 {
 	(*class) = newClass();
 	(*class)->dtable = _PRIMITIVE_DTABLE;
+	(*class)->Idtable = _PRIMITIVE_DTABLE;
 	(*class)->name = makeUtf8Const(name, -1);
 	CLASS_PRIM_SIG(*class) = sig;
 	TYPE_PRIM_SIZE(*class) = len;
@@ -84,6 +85,16 @@ finishTypes(void)
 	floatClass->head.dtable = ClassClass->dtable;
 	doubleClass->head.dtable = ClassClass->dtable;
 	voidClass->head.dtable = ClassClass->dtable;
+
+	byteClass->head.Idtable = ClassClass->Idtable;
+	shortClass->head.Idtable = ClassClass->Idtable;
+	intClass->head.Idtable = ClassClass->Idtable;
+	longClass->head.Idtable = ClassClass->Idtable;
+	booleanClass->head.Idtable = ClassClass->Idtable;
+	charClass->head.Idtable = ClassClass->Idtable;
+	floatClass->head.Idtable = ClassClass->Idtable;
+	doubleClass->head.Idtable = ClassClass->Idtable;
+	voidClass->head.Idtable = ClassClass->Idtable;
 }
 
 Hjava_lang_Class*

@@ -144,6 +144,9 @@ initBaseClasses(void)
 	ObjectClass->head.dtable = ClassClass->dtable;
 	SerialClass->head.dtable = ClassClass->dtable;
 	ClassClass->head.dtable = ClassClass->dtable;
+	ObjectClass->head.Idtable = ClassClass->Idtable;
+	SerialClass->head.Idtable = ClassClass->Idtable;
+	ClassClass->head.Idtable = ClassClass->Idtable;
 
 	/* Basic types classes */
 	loadStaticClass(&javaLangVoidClass, "java/lang/Void");

@@ -25,7 +25,7 @@
 #define	get_special_method_info(idx)  getMethodSignatureClass(idx, meth->class, true, true, &cinfo)
 
 #define	get_dispatch_table(mtable) \
-	move_ref(mtable, ((slots*)&cinfo.class->dtable))
+	move_ref(mtable, ((slots*)&cinfo.class->Idtable))
 
 #define	method_name()		(cinfo.name)
 #define	method_sig()		(cinfo.signature)
@@ -33,7 +33,7 @@
 #define method_method()		(cinfo.method)
 #define method_class()		(cinfo.class)
 #define	method_nargs()		(cinfo.in)
-#define	method_dtable_offset	OBJECT_DTABLE_OFFSET
+#define	method_dtable_offset	OBJECT_DTABLE_OFFSET_I
 #define	method_returntype()	(cinfo.rettype)
 
 #define	get_field_info(IDX) \

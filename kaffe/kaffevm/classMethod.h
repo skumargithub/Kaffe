@@ -77,6 +77,7 @@ struct Hjava_lang_Class {
 	/* Number of static fields. */
 	short			nsfields;
 
+	struct _dispatchTable*	Idtable;
 	struct _dispatchTable*	dtable;
 
         struct Hjava_lang_Class** interfaces;

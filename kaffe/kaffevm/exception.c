@@ -140,7 +140,7 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 
                 /* Look for handler */
                 res = findExceptionBlockInMethod(   v->pc,
-                                                    eobj->base.dtable->class,
+                                                    eobj->base.Idtable->class,
                                                     v->meth,
                                                     &einfo);
 
@@ -244,7 +244,7 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 
                 /* Look for handler */
                 res = findExceptionBlockInMethod(   v->pc,
-                                                    eobj->base.dtable->class,
+                                                    eobj->base.Idtable->class,
                                                     v->meth,
                                                     &einfo);
 
