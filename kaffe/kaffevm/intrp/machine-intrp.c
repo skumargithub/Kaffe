@@ -101,6 +101,32 @@ do {								\
 	}							\
 } while (0)
 
+#define	call(m) \
+do {    \
+    softcall_initialise_class(method_class());  \
+    if((m)->accflags & ACC_TOINTERPRET) \
+    {   \
+        virtualMachine((m), sp+1, retval, tid); \
+    }   \
+    else    \
+    {   \
+        assert(0);  \
+    }   \
+} while(0)
+
+#define	call_indirect_method(m) \
+do { \
+    softcall_initialise_class(method_class()); \
+    if(m->accflags & ACC_TOINTERPRET)   \
+    {   \
+        virtualMachine(m, sp+1, retval, tid); \
+    }   \
+    else    \
+    {   \
+        assert(0);  \
+    }   \
+} while(0)
+
 void
 virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thread* tid)
 {
