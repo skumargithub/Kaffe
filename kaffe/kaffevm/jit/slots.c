@@ -11,7 +11,7 @@
 #include "config.h"
 #include "config-std.h"
 #include "gtypes.h"
-#include "slots.h"
+#include "slots-jit.h"
 #include "registers.h"
 #include "md.h"
 #include "gc.h"

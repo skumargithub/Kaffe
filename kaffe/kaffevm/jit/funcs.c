@@ -12,7 +12,7 @@
 #include "config-std.h"
 #include "gtypes.h"
 #include "seq.h"
-#include "slots.h"
+#include "slots-jit.h"
 #include "registers.h"
 #include "labels.h"
 #include "basecode.h"

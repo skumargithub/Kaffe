@@ -7,7 +7,9 @@
  * See the file "license.terms" for information on usage and redistribution 
  * of this file. 
  */
+#ifndef TRANSLATOR
 #define TRANSLATOR
+#endif
 
 #include "config.h"
 #include "debug.h"
@@ -16,13 +18,13 @@
 #include "classMethod.h"
 #include "gtypes.h"
 #include "bytecode.h"
-#include "slots.h"
+#include "slots-jit.h"
 #include "registers.h"
 #include "seq.h"
 #include "gc.h"
 #include "machine-jit.h"
 #include "basecode.h"
-#include "icode.h"
+#include "icode-jit.h"
 #include "icode_internal.h"
 #include "labels.h"
 #include "constpool.h"
