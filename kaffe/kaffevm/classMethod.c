@@ -364,10 +364,12 @@ readMethodXlt(void)
         *s = '\0';
         methodNames[numMethods] = strdup(buffer);
 
+#if 0
         fprintf(stderr,
                 "Will interpret \"%s-%s\"\n",
                 methodNames[numMethods],
                 methodSigs[numMethods]);
+#endif
 
         numMethods++;
     }
