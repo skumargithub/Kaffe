@@ -107,7 +107,6 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 	char* sig = meth->signature->data;
 	int i = 0;
 	int s = 0;
-	jvalue *in = call->args;
 
 	/* If this method isn't static, we must insert the object as
 	 * an argument.
@@ -116,7 +115,6 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 		call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
 		s += call->callsize[i];
 		call->calltype[i] = 'L';
-		in[i] = args[i];
 		i++;
 	}
 
@@ -131,13 +129,11 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 		case 'C':
 		case 'F':
 			call->callsize[i] = 1;
-			in[i] = args[i];
 			break;
 
 		case 'D':
 		case 'J':
 			call->callsize[i] = 2;
-			in[i] = args[i];
 			i++;
 			call->callsize[i] = 0;
 			break;
@@ -145,7 +141,6 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 		case '[':
 			call->calltype[i] = 'L';	/* Looks like an object */
 			call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
-			in[i] = args[i];
 			while (*sig == '[') {
 				sig++;
 			}
@@ -157,7 +152,6 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 			break;
 		case 'L':
 			call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
-			in[i] = args[i];
 			while (*sig != ';') {
 				sig++;
 			}
@@ -186,6 +180,7 @@ intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
 
 	/* Call info and arguments */
 	call->nrargs = i;
+    call->args = args;
 	call->argsize = s;
 	call->ret = R;
 	call->function = meth->ncode;
