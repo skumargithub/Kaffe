@@ -449,7 +449,10 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
             /*
              * Apply internal heuristic for JIT compilation
              */
-            mt->accflags |= ACC_TOINTERPRET;
+            if(!(mt->accflags & ACC_NATIVE))
+            {
+                mt->accflags |= ACC_TOINTERPRET;
+            }
         break;
 
         case 40:
@@ -464,6 +467,11 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
             {
                 firstTime = 1;
                 readMethodXlt();
+            }
+
+            if(mt->accflags & ACC_NATIVE)
+            {
+                break;
             }
 
             for(i = 0; i < numMethods; i++)
