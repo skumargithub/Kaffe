@@ -33,8 +33,6 @@
 #include "locks.h"
 #include "stackTrace.h"
 
-#define	GETNEXTFRAME(F)		((*Kaffe_ThreadInterface.nextFrame)(F))
-
 static void nullException(EXCEPTIONPROTO);
 static void floatingException(EXCEPTIONPROTO);
 static void dispatchException(Hjava_lang_Throwable*, struct _exceptionFrame*) __NORETURN__;
@@ -66,52 +64,15 @@ throwException(Hjava_lang_Object* eobj)
 void
 throwExternalException(Hjava_lang_Object* eobj)
 {
-    switch(Kaffe_JavaVMArgs[0].JITstatus)
-    {
-        case 10:
-        {
-            /*
-             * Pure Interpreter
-             */
-            if (eobj == 0) {
-                fprintf(stderr, "Exception thrown on null object ... abort\n");
-                ABORT();
-                EXIT(1);
-            }
+    exceptionFrame frame = *((exceptionFrame*)(((uintp)&(eobj))-8));
 
-            dispatchException((Hjava_lang_Throwable*) eobj, NULL);
-        }
-        break;
-
-        case 20:
-        {
-            /*
-             * Pure JIT
-             */
-            exceptionFrame frame;
-            if (eobj == 0) {
-                fprintf(stderr, "Exception thrown on null object ... abort\n");
-                ABORT();
-                EXIT(1);
-            }
-
-            frame = *((exceptionFrame*)(((uintp)&(eobj))-8));
-            dispatchException((Hjava_lang_Throwable*) eobj, &frame);
-        }
-        break;
-
-        case 30:
-            assert(0);
-        break;
-
-        case 40:
-            assert(0);
-        break;
-
-        default:
-            assert(0);
-        break;
+    if (eobj == 0) {
+        fprintf(stderr, "Exception thrown on null object ... abort\n");
+        ABORT();
+        EXIT(1);
     }
+
+    dispatchException((Hjava_lang_Throwable*) eobj, &frame);
 }
 
 void
@@ -127,6 +88,8 @@ throwOutOfMemory(void)
 	EXIT(-1);
 }
 
+vmException* isIntrpFrame(uintp);
+
 static
 void
 dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
@@ -136,6 +99,10 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 	Hjava_lang_Object* obj;
 	iLock* lk;
 	Hjava_lang_Thread* ct;
+
+    exceptionInfo einfo;
+    vmException* v;
+    exceptionFrame* e;
 
 	/* Release the interrupts (in case they were held when this
 	 * happened - and hope this doesn't break anything).
@@ -157,56 +124,56 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
         /*
          * Pure interpreter
          */
-		exceptionInfo einfo;
-		vmException* frame;
 		bool res;
 
-		for(frame = (vmException*)unhand(ct)->exceptPtr;
-            frame != 0; frame = frame->prev)
+		for(e = baseframe; e != 0; e = Kaffe_ThreadInterface.nextFrame(e))
         {
-			if(frame->meth == (Method*)1)
+            if((v = isIntrpFrame(e->retbp)) != NULL)
             {
-                /* Don't allow JNI to catch thread death
-                 * exceptions.  Might be bad but its going
-                 * 1.2 anyway.
-                 */
-                if(strcmp(cname, THREADDEATHCLASS) != 0)
+                if(v->meth == (Method*)1)
                 {
-                    unhand(ct)->exceptPtr = (struct Hkaffe_util_Ptr*)frame;
-                    Kaffe_JNIExceptionHandler();
+                    /* Don't allow JNI to catch thread death
+                     * exceptions.  Might be bad but its going
+                     * 1.2 anyway.
+                     */
+                    if(strcmp(cname, THREADDEATHCLASS) != 0)
+                    {
+                        unhand(ct)->exceptPtr = (struct Hkaffe_util_Ptr*) v;
+                        Kaffe_JNIExceptionHandler();
+                    }
                 }
-			}
 
-			/* Look for handler */
-			res = findExceptionBlockInMethod(   frame->pc,
-                                                eobj->base.dtable->class,
-                                                frame->meth,
-                                                &einfo);
+                /* Look for handler */
+                res = findExceptionBlockInMethod(   v->pc,
+                                                    eobj->base.dtable->class,
+                                                    v->meth,
+                                                    &einfo);
 
-			/* Find the sync. object */
-			if( einfo.method == 0 ||
-                (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
-				obj = 0;
-			}
-			else if (einfo.method->accflags & ACC_STATIC) {
-				obj = &einfo.class->head;
-			}
-			else {
-				obj = frame->mobj;
-			}
+                /* Find the sync. object */
+                if( einfo.method == 0 ||
+                    (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
+                    obj = 0;
+                }
+                else if (einfo.method->accflags & ACC_STATIC) {
+                    obj = &einfo.class->head;
+                }
+                else {
+                    obj = v->mobj;
+                }
 
-			/* If handler found, call it */
-			if (res == true) {
-				frame->pc = einfo.handler;
-				longjmp(frame->jbuf, 1);
-			}
+                /* If handler found, call it */
+                if (res == true) {
+                    v->pc = einfo.handler;
+                    longjmp(v->jbuf, 1);
+                }
 
-			/* If not here, exit monitor if synchronised. */
-			lk = getLock(obj);
-			if( lk != 0 &&
-                lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
-				unlockMutex(obj);
-			}
+                /* If not here, exit monitor if synchronised. */
+                lk = getLock(obj);
+                if( lk != 0 &&
+                    lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
+                    unlockMutex(obj);
+                }
+            }
 		}
 	}
     else if(Kaffe_JavaVMArgs[0].JITstatus == 20)
@@ -214,16 +181,14 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
         /*
          * Pure JIT
          */
-		exceptionFrame* frame;
-		exceptionInfo einfo;
 
-		for(frame = baseframe; frame != 0; frame = GETNEXTFRAME(frame))
+		for(e = baseframe; e != 0; e = Kaffe_ThreadInterface.nextFrame(e))
         {
-			findExceptionInMethod(PCFRAME(frame), class, &einfo);
+			findExceptionInMethod(PCFRAME(e), class, &einfo);
 
             if( einfo.method == 0 &&
-                PCFRAME(frame) >= Kaffe_JNI_estart &&
-                PCFRAME(frame) < Kaffe_JNI_eend)
+                PCFRAME(e) >= Kaffe_JNI_estart &&
+                PCFRAME(e) < Kaffe_JNI_eend)
             {
                 /* Don't allow JNI to catch thread death
                  * exceptions.  Might be bad but its going
@@ -243,13 +208,13 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 				obj = &einfo.class->head;
 			}
 			else {
-				obj = FRAMEOBJECT(frame);
+				obj = FRAMEOBJECT(e);
 			}
 
 			/* Handler found - dispatch exception */
 			if (einfo.handler != 0) {
 				unhand(ct)->exceptObj = 0;
-				CALL_KAFFE_EXCEPTION(frame, einfo, eobj);
+				CALL_KAFFE_EXCEPTION(e, einfo, eobj);
 			}
 
 			/* If method found and synchronised, unlock the lock */
@@ -321,54 +286,17 @@ static void
 nullException(EXCEPTIONPROTO)
 {
 	Hjava_lang_Throwable* npe;
+    exceptionFrame frame;
 
-    switch(Kaffe_JavaVMArgs[0].JITstatus)
-    {
-        case 10:
-        {
-            /*
-             * Pure Interpreter
-             */
-            /* don't catch the signal if debugging exceptions */
-            if (DBGEXPR(EXCEPTION, false, true))
-                catchSignal(sig, nullException);
+    EXCEPTIONFRAME(frame, ctx);
 
-            npe = (Hjava_lang_Throwable*)NullPointerException;
-            unhand(npe)->backtrace = buildStackTrace(NULL);
-            dispatchException(npe, NULL);
-        }
-        break;
+    /* don't catch the signal if debugging exceptions */
+    if (DBGEXPR(EXCEPTION, false, true))
+        catchSignal(sig, nullException);
 
-        case 20:
-        {
-            /*
-             * Pure JIT
-             */
-            exceptionFrame frame;
-
-            /* don't catch the signal if debugging exceptions */
-            if (DBGEXPR(EXCEPTION, false, true))
-                catchSignal(sig, nullException);
-
-            EXCEPTIONFRAME(frame, ctx);
-            npe = (Hjava_lang_Throwable*)NullPointerException;
-            unhand(npe)->backtrace = buildStackTrace(&frame);
-            dispatchException(npe, &frame);
-        }
-        break;
-
-        case 30:
-            assert(0);
-        break;
-
-        case 40:
-            assert(0);
-        break;
-
-        default:
-            assert(0);
-        break;
-    }
+    npe = (Hjava_lang_Throwable*)NullPointerException;
+    unhand(npe)->backtrace = buildStackTrace(&frame);
+    dispatchException(npe, &frame);
 }
 
 /*
@@ -378,54 +306,17 @@ static void
 floatingException(EXCEPTIONPROTO)
 {
 	Hjava_lang_Throwable* ae;
+    exceptionFrame frame;
 
-    switch(Kaffe_JavaVMArgs[0].JITstatus)
-    {
-        case 10:
-        {
-            /*
-             * Pure Interpreter
-             */
-            /* don't catch the signal if debugging exceptions */
-            if (DBGEXPR(EXCEPTION, false, true))
-                catchSignal(sig, floatingException);
+    EXCEPTIONFRAME(frame, ctx);
 
-            ae = (Hjava_lang_Throwable*)ArithmeticException;
-            unhand(ae)->backtrace = buildStackTrace(NULL);
-            dispatchException(ae, NULL);
-        }
-        break;
+    /* don't catch the signal if debugging exceptions */
+    if (DBGEXPR(EXCEPTION, false, true))
+        catchSignal(sig, floatingException);
 
-        case 20:
-        {
-            /*
-             * Pure JIT
-             */
-            exceptionFrame frame;
-
-            /* don't catch the signal if debugging exceptions */
-            if (DBGEXPR(EXCEPTION, false, true))
-                catchSignal(sig, nullException);
-
-            EXCEPTIONFRAME(frame, ctx);
-            ae = (Hjava_lang_Throwable*)ArithmeticException;
-            unhand(ae)->backtrace = buildStackTrace(&frame);
-            dispatchException(ae, &frame);
-        }
-        break;
-
-        case 30:
-            assert(0);
-        break;
-
-        case 40:
-            assert(0);
-        break;
-
-        default:
-            assert(0);
-        break;
-    }
+    ae = (Hjava_lang_Throwable*)ArithmeticException;
+    unhand(ae)->backtrace = buildStackTrace(&frame);
+    dispatchException(ae, &frame);
 }
 
 /*
