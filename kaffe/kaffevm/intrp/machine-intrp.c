@@ -161,6 +161,22 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 static bool
 canBeTranslated(Method *meth)
 {
+    if(!strcmp(meth->name->data, "<clinit>"))
+    {
+        /*
+         * No point in JIT <clinit> if it has already been called
+         */
+        return false;
+    }
+    else if(!strcmp(meth->name->data, "main") &&
+            !strcmp(meth->signature->data, "([Ljava/lang/String;)V"))
+    {
+        /*
+         * No point in JIT main if it has already been called
+         */
+        return false;
+    }
+
     return true;
 }
 
