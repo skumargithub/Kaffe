@@ -6,7 +6,7 @@
 # See the file "license.terms" for information on usage and redistribution 
 # of this file. 
 
-@VPATHOPT@=	@srcdir@@VPATHSEP@@srcdir@/@with_engine@@VPATHSEP@@srcdir@/../../config/@host_cpu@/@host_os@@VPATHSEP@@srcdir@/../../config/@host_cpu@@VPATHSEP@@srcdir@/systems/@THREAD_SYSTEM@:@VPATHSEP@@srcdir@/mem
+@VPATHOPT@=	@srcdir@@VPATHSEP@@srcdir@/../../config/@host_cpu@/@host_os@@VPATHSEP@@srcdir@/../../config/@host_cpu@@VPATHSEP@@srcdir@/systems/@THREAD_SYSTEM@:@VPATHSEP@@srcdir@/mem@VPATHSEP@jit@VPATHSEP@intrp
 srcdir=		@srcdir@
 prefix=		@prefix@
 exec_prefix=	@exec_prefix@
@@ -30,7 +30,8 @@ KVER=		@KVER@
 OBJEXT=		@OBJEXT@
 LIBEXT=		@LIBVMEXT@
 
-INCLUDES=	-I. -I$(srcdir) -I$(srcdir)/../../config -I../../config -I../../include -I$(srcdir)/../../include -I../../libraries/clib
+INCLUDES=	-I. -I../../config -I../../include -I../../libraries/clib \
+            -Ijit -Iintrp
 CPPFLAGS=	@CPPFLAGS@
 CFLAGS=		@CFLAGS@
 ALL_CFLAGS=	$(INCLUDES) $(CPPFLAGS) $(CFLAGS) @KAFFEVMFLAGS@ $(ENGINE_CFLAGS) -DKVER=\"$(KVER)\" $(EXTRA_CFLAGS)
@@ -66,6 +67,18 @@ COMMON=\
 		debug$(OBJEXT) \
 		jni$(OBJEXT) \
 		md$(OBJEXT)
+
+ENGINE_OBJECTS=\
+		basecode$(OBJEXT) \
+		constpool$(OBJEXT) \
+		funcs$(OBJEXT) \
+		icode$(OBJEXT) \
+		labels$(OBJEXT) \
+		registers$(OBJEXT) \
+		slots$(OBJEXT) \
+		machine-jit$(OBJEXT) \
+		machine-intrp$(OBJEXT) \
+		seq$(OBJEXT)
 
 all:		mkkaffevm
 
