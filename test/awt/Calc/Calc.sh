@@ -3,3 +3,4 @@
 rm -f Calc.class
 Kaffe.jit pizza.compiler.Main Calc.java
 Kaffe.jit Calc
+rm -f Calc.class
