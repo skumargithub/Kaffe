@@ -293,6 +293,8 @@ virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thr
 	Hjava_lang_Class* crinfo;
 
     callMethodInfo cM;
+    unsigned long long delta = 0, begin = 0, end = 0;
+    bool excpt = false;
 
     if(Kaffe_JavaVMArgs[0].JITstatus == 30 && methodCanBeTranslated(meth))
     {
@@ -328,6 +330,7 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
         END_TIMER(meth->stats.timeVerify);
 	}
 
+
 	/* Allocate stack space and locals. */
 	lcl = alloca(sizeof(slots) * (meth->localsz + meth->stacksz));
 
@@ -360,6 +363,7 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 			sp = &lcl[meth->localsz];
 			sp->v.taddr = (void*)unhand(tid)->exceptObj;
 			unhand(tid)->exceptObj = 0;
+            excpt = true;
 			goto restart;
 		}
 	}
@@ -391,6 +395,7 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 	code = (bytecode*)meth->c.bcode.code;
 
 	/* Finally we get to actually execute the machine */
+    GET_TIME(begin);
 	for (;;) {
 		assert(npc < meth->c.bcode.codelen);
 		pc = npc;
@@ -450,6 +455,9 @@ case INVOKEVIRTUAL:
 		low = method_returntype();
         softcall_initialise_class(method_class());
 
+        GET_TIME(end);
+        delta += (end - begin);
+
         cinfo.method = tmp[0].v.taddr;
         if(cinfo.method->accflags & ACC_TOINTERPRET)
         {
@@ -468,6 +476,7 @@ case INVOKEVIRTUAL:
 
             sysdepCallMethod(&cM);
         }
+        GET_TIME(begin);
 
 		/* Pop args */
 		popargs();
@@ -517,6 +526,9 @@ case INVOKESPECIAL:
 
         softcall_initialise_class(method_class());
 
+        GET_TIME(end);
+        delta += (end - begin);
+
         if(cinfo.method->accflags & ACC_TOINTERPRET)
         {
             virtualMachine(cinfo.method, sp+1, retval, tid);
@@ -534,6 +546,7 @@ case INVOKESPECIAL:
 
             sysdepCallMethod(&cM);
         }
+        GET_TIME(begin);
 
 		/* Pop args */
 		popargs();
@@ -575,6 +588,9 @@ case INVOKESTATIC:
 		low = method_returntype();
         softcall_initialise_class(method_class());
 
+        GET_TIME(end);
+        delta += (end - begin);
+
         if(cinfo.method->accflags & ACC_TOINTERPRET)
         {
             virtualMachine(cinfo.method, sp+1, retval, tid);
@@ -592,6 +608,7 @@ case INVOKESTATIC:
 
             sysdepCallMethod(&cM);
         }
+        GET_TIME(begin);
 
 		/* Pop args */
 		popargs();
@@ -644,6 +661,9 @@ case INVOKEINTERFACE:
 		low = method_returntype();
         softcall_initialise_class(method_class());
 
+        GET_TIME(end);
+        delta += (end - begin);
+
         cinfo.method = tmp[0].v.taddr;
         if(cinfo.method->accflags & ACC_TOINTERPRET)
         {
@@ -662,6 +682,7 @@ case INVOKEINTERFACE:
 
             sysdepCallMethod(&cM);
         }
+        GET_TIME(begin);
 
 		/* Pop args */
 		popargs();
@@ -676,6 +697,19 @@ break;
 		}
 	}
 	end:
+    GET_TIME(end);
+    delta += (end - begin);
+    if(excpt == false)
+    {
+        if(meth->stats.timeRun == 0)
+        {
+            meth->stats.timeRun = delta;
+        }
+        else
+        {
+            meth->stats.timeRun = (meth->stats.timeRun + delta) / 2;
+        }
+    }
 
 	/* Unsync. if required */
 	if (mobj != 0) {

@@ -130,8 +130,10 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 
 	/* Scan the code and mark the beginning of basic blocks */
 	wide = false;
+    meth->stats.numByteCode = 0;
 	for (pc = 0; pc < codeInfo->codelen;) {
 		SET_STARTOFINSTRUCTION(pc);
+        meth->stats.numByteCode++;
 		switch (INSN(pc)) {
 		case IFEQ:	case IFNE:	case IFLT:
 		case IFGE:	case IFGT:	case IFLE:
@@ -146,7 +148,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			pc = pc + INSNLEN(pc);
 			SET_STARTOFBASICBLOCK(pc);
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
             meth->stats.numBranch++;
 			break;
 		case GOTO:
@@ -154,7 +155,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			SET_STARTOFBASICBLOCK(tabpc);
 			SET_JUMPFLOW(pc, tabpc);
 			pc = pc + INSNLEN(pc);
-            meth->stats.numByteCode++;
             meth->stats.numBranch++;
 			break;
 		case GOTO_W:
@@ -162,7 +162,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			SET_STARTOFBASICBLOCK(tabpc);
 			SET_JUMPFLOW(pc, tabpc);
 			pc = pc + INSNLEN(pc);
-            meth->stats.numByteCode++;
             meth->stats.numBranch++;
 			break;
 		case JSR:
@@ -172,7 +171,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			pc = pc + INSNLEN(pc);
 			SET_STARTOFBASICBLOCK(pc);
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
 			break;
 		case JSR_W:
 			tabpc = pc + DWORD(pc+1);
@@ -181,7 +179,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			pc = pc + INSNLEN(pc);
 			SET_STARTOFBASICBLOCK(pc);
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
 			break;
 		case TABLESWITCH:
 			tabpc = (pc + 4) & -4;
@@ -193,7 +190,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			SET_STARTOFBASICBLOCK(pc+DWORD(tabpc));
 			SET_JUMPFLOW(pc, pc+DWORD(tabpc));
 			pc = tabpc + (DWORD(tabpc+8)-DWORD(tabpc+4)+1+3) * 4;
-            meth->stats.numByteCode++;
             meth->stats.numSwitch++;
 			break;
 		case LOOKUPSWITCH:
@@ -206,21 +202,18 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 			SET_STARTOFBASICBLOCK(pc+DWORD(tabpc));
 			SET_JUMPFLOW(pc, pc+DWORD(tabpc));
 			pc = tabpc + (DWORD(tabpc+4)+1) * 8;
-            meth->stats.numByteCode++;
             meth->stats.numSwitch++;
 			break;
 		case IRETURN:	case LRETURN:	case ARETURN:
 		case FRETURN:	case DRETURN:	case RETURN:
 		case ATHROW:	case RET:
 			pc = pc + INSNLEN(pc);
-            meth->stats.numByteCode++;
             meth->stats.numExit++;
 			break;
 		case WIDE:
 			wide = true;
 			pc = pc + INSNLEN(pc);
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
 			break;
 		case ILOAD:	case LLOAD:	case FLOAD:
 		case DLOAD:	case ALOAD:
@@ -232,7 +225,6 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 				pc += 1;
 			}
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
 			break;
 		case IINC:
 			pc = pc + INSNLEN(pc);
@@ -241,13 +233,11 @@ CDBG(	dprintf(__FUNCTION__"codeInfo = 0x%x\n", codeInfo);		)
 				pc += 2;
 			}
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
 			break;
 		default:
 			/* The default */
 			pc = pc + INSNLEN(pc);
 			SET_NORMALFLOW(pc);
-            meth->stats.numByteCode++;
 			break;
 		}
 	}

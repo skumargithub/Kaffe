@@ -24,6 +24,18 @@ void init_md(void);
 /* Linux requires a little initialisation */
 #define	INIT_MD()	init_md()
 
+#define GET_TIME(X)                                             \
+    {                                                           \
+        unsigned int beginL__ = 0, beginH__ = 0;                \
+                                                                \
+        __asm__ __volatile__ (                                  \
+                ".byte 0x0f,0x31"                               \
+                :"=a"(beginL__), "=d"(beginH__));               \
+                                                                \
+       (X)    = (((unsigned long long) beginL__)      ) |       \
+                (((unsigned long long) beginH__) << 32);        \
+    }
+
 #define BEGIN_TIMER()                                           \
     {                                                           \
         unsigned int beginL__ = 0, beginH__ = 0;                \
@@ -35,7 +47,7 @@ void init_md(void);
                 :"=a"(beginL__), "=d"(beginH__));               \
                                                                 \
         begin = (((unsigned long long) beginL__)      ) |       \
-                (((unsigned long long) beginH__) << 32);        \
+                (((unsigned long long) beginH__) << 32);
 
 #define END_TIMER(X)                                            \
         __asm__ __volatile__ (                                  \

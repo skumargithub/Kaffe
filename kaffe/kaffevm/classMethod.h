@@ -116,6 +116,7 @@ typedef struct _statInfo
     int numExit;
     unsigned long long timeVerify;
     unsigned long long timeTranslate;
+    unsigned long long timeRun;
     u2  flags;
 } statInfo;
 

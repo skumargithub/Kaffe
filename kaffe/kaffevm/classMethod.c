@@ -435,6 +435,7 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
     mt->stats.numSwitch = 0;
     mt->stats.numExit = 0;
     mt->stats.timeTranslate = 0;
+    mt->stats.timeRun = 0;
     mt->codeInfo = 0;
 
 	/* Mark constructors as such */
@@ -1447,20 +1448,22 @@ printMethodStats(void)
 
                         fprintf(fp,
                                 "%s.%s%s\n"
-                                "I= %4d, "
-                                "B= %4d, Br= %3d, X= %2d, S= %2d, E= %2d, "
-                                "V= %8llu, T= %8llu\n",
+                                "I= %4d, J= %3d, X= %2d, S= %2d, E= %2d\n"
+                                "B= %4d, V= %8llu, T= %8llu, t= %8llu\n",
                                 ptr->class->name->data,
                                 ptr->name->data,
                                 ptr->signature->data,
+
                                 ptr->stats.invokeCount,
-                                ptr->stats.numByteCode,
                                 ptr->stats.numBranch,
                                 ex ? ex->length : 0,
                                 ptr->stats.numSwitch,
                                 ptr->stats.numExit,
+
+                                ptr->stats.numByteCode,
                                 ptr->stats.timeVerify,
-                                ptr->stats.timeTranslate);
+                                ptr->stats.timeTranslate,
+                                ptr->stats.timeRun);
                     }
 				}
 			}
