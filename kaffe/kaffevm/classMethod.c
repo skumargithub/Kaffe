@@ -821,10 +821,10 @@ buildDispatchTable(Hjava_lang_Class* class)
 	Method* meth;
 	void** mtab;
 	int i;
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 	int ntramps = 0;
 	methodTrampoline* tramp;
-#endif
+/* #endif */
 
 	if (class->superclass != NULL) {
 		class->msize = class->superclass->msize;
@@ -837,11 +837,14 @@ buildDispatchTable(Hjava_lang_Class* class)
 	i = CLASS_NMETHODS(class);
 	for (; --i >= 0; meth++) {
 		Hjava_lang_Class* super = class->superclass;
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
+if(!(meth->accflags & ACC_TOINTERPRET))
+{
 		if (METHOD_NEEDS_TRAMPOLINE(meth)) {
 			ntramps++;
 		}
-#endif
+}
+/* #endif */
 		if ((meth->accflags & ACC_STATIC)
 		    || equalUtf8Consts(meth->name, constructor_name)) {
 			meth->idx = -1;
@@ -867,16 +870,16 @@ buildDispatchTable(Hjava_lang_Class* class)
 		foundmatch:;
 	}
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 	/* Allocate the dispatch table and this class' trampolines all in
 	   one block of memory.  This is primarily done for GC reasons in
 	   that I didn't want to add another slot on class just for holding
 	   the trampolines, but it also works out for space reasons.  */
 	class->dtable = (dispatchTable*)gc_malloc(sizeof(dispatchTable) + class->msize * sizeof(void*) + ntramps * sizeof(methodTrampoline), GC_ALLOC_DISPATCHTABLE);
 	tramp = (methodTrampoline*) &class->dtable->method[class->msize];
-#else
-	class->dtable = (dispatchTable*)gc_malloc(sizeof(dispatchTable) + (class->msize * sizeof(void*)), GC_ALLOC_DISPATCHTABLE);
-#endif
+/* #else */
+	/* class->dtable = (dispatchTable*)gc_malloc(sizeof(dispatchTable) + (class->msize * sizeof(void*)), GC_ALLOC_DISPATCHTABLE); */
+/* #endif */
 
 	class->dtable->class = class;
 	mtab = class->dtable->method;
@@ -891,8 +894,10 @@ buildDispatchTable(Hjava_lang_Class* class)
 
 	meth = CLASS_METHODS(class);
 	i = CLASS_NMETHODS(class);
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 	for (; --i >= 0; meth++) {
+if(!(meth->accflags & ACC_TOINTERPRET))
+{
 		if (METHOD_NEEDS_TRAMPOLINE(meth)) {
 #if 0
 			if (METHOD_TRANSLATED(meth)) {
@@ -907,15 +912,22 @@ buildDispatchTable(Hjava_lang_Class* class)
 		if (meth->idx >= 0) {
 			mtab[meth->idx] = METHOD_NATIVECODE(meth);
 		}
-	}
-	FLUSH_DCACHE(class->dtable, tramp);
-#else
-	for (;  --i >= 0; meth++) {
+}
+else
+{
 		if (meth->idx >= 0) {
 			mtab[meth->idx] = meth;
 		}
+}
 	}
-#endif
+	/* FLUSH_DCACHE(class->dtable, tramp); */
+/* #else */
+	/* for (;  --i >= 0; meth++) { */
+		/* if (meth->idx >= 0) { */
+			/* mtab[meth->idx] = meth; */
+		/* } */
+	/* } */
+/* #endif */
 
 	/* Check for undefined abstract methods if class is not abstract.
 	 * See "Java Language Specification" (1996) section 12.3.2. */
@@ -932,9 +944,17 @@ static
 void
 buildInterfaceDispatchTable(Hjava_lang_Class* class)
 {
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 	Method* meth;
 	int i;
+
+    if(Kaffe_JavaVMArgs[0].JITstatus == 10)
+    {
+        /*
+         * Do nothing for interpreter
+         */
+        return;
+    }
 
 	meth = CLASS_METHODS(class);
 	i = CLASS_NMETHODS(class);
@@ -952,9 +972,9 @@ buildInterfaceDispatchTable(Hjava_lang_Class* class)
 		methodTrampoline* tramp = (methodTrampoline*)gc_malloc(sizeof(methodTrampoline), GC_ALLOC_DISPATCHTABLE);
 		FILL_IN_TRAMPOLINE(tramp, meth);
 		METHOD_NATIVECODE(meth) = (nativecode*)tramp;
-		FLUSH_DCACHE(tramp, tramp+1);
+		/* FLUSH_DCACHE(tramp, tramp+1); */
 	}
-#endif
+/* #endif */
 }
 
 /*
