@@ -94,26 +94,23 @@ static
 void
 dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
 {
-	char* cname;
-	Hjava_lang_Class* class;
+	Hjava_lang_Class* class = OBJECT_CLASS(&eobj->base);
+	char* cname = CLASS_CNAME(class);
 	Hjava_lang_Object* obj;
 	iLock* lk;
-	Hjava_lang_Thread* ct;
+	Hjava_lang_Thread* ct = getCurrentThread();
 
     exceptionInfo einfo;
     vmException* v;
     exceptionFrame* e;
+
+    bool res;
 
 	/* Release the interrupts (in case they were held when this
 	 * happened - and hope this doesn't break anything).
 	 * XXX - breaks the thread abstraction model !!!
 	 */
 	Tspinoffall();
-
-	ct = getCurrentThread();
-
-	class = OBJECT_CLASS(&eobj->base);
-	cname = CLASS_CNAME(class);
 
 	/* Save exception object */
 	unhand(ct)->exceptObj = (struct Hkaffe_util_Ptr*)eobj;
@@ -124,8 +121,6 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
         /*
          * Pure interpreter
          */
-		bool res;
-
 		for(e = baseframe; e != 0; e = Kaffe_ThreadInterface.nextFrame(e))
         {
             if((v = isIntrpFrame(e->retbp)) != NULL)
@@ -181,7 +176,6 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
         /*
          * Pure JIT
          */
-
 		for(e = baseframe; e != 0; e = Kaffe_ThreadInterface.nextFrame(e))
         {
 			findExceptionInMethod(PCFRAME(e), class, &einfo);
@@ -223,6 +217,104 @@ dispatchException(Hjava_lang_Throwable* eobj, struct _exceptionFrame* baseframe)
                 lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
 				unlockMutex(obj);
 			}
+		}
+	}
+    else if(Kaffe_JavaVMArgs[0].JITstatus == 30 ||
+            Kaffe_JavaVMArgs[0].JITstatus == 40)
+	{
+        /*
+         * Mix modes
+         */
+		for(e = baseframe; e != 0; e = Kaffe_ThreadInterface.nextFrame(e))
+        {
+            if((v = isIntrpFrame(e->retbp)) != NULL)
+            {
+                if(v->meth == (Method*)1)
+                {
+                    /* Don't allow JNI to catch thread death
+                     * exceptions.  Might be bad but its going
+                     * 1.2 anyway.
+                     */
+                    if(strcmp(cname, THREADDEATHCLASS) != 0)
+                    {
+                        unhand(ct)->exceptPtr = (struct Hkaffe_util_Ptr*) v;
+                        Kaffe_JNIExceptionHandler();
+                    }
+                }
+
+                /* Look for handler */
+                res = findExceptionBlockInMethod(   v->pc,
+                                                    eobj->base.dtable->class,
+                                                    v->meth,
+                                                    &einfo);
+
+                /* Find the sync. object */
+                if( einfo.method == 0 ||
+                    (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
+                    obj = 0;
+                }
+                else if (einfo.method->accflags & ACC_STATIC) {
+                    obj = &einfo.class->head;
+                }
+                else {
+                    obj = v->mobj;
+                }
+
+                /* If handler found, call it */
+                if (res == true) {
+                    v->pc = einfo.handler;
+                    longjmp(v->jbuf, 1);
+                }
+
+                /* If not here, exit monitor if synchronised. */
+                lk = getLock(obj);
+                if( lk != 0 &&
+                    lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
+                    unlockMutex(obj);
+                }
+            }
+            else
+            {
+                findExceptionInMethod(PCFRAME(e), class, &einfo);
+
+                if( einfo.method == 0 &&
+                    PCFRAME(e) >= Kaffe_JNI_estart &&
+                    PCFRAME(e) < Kaffe_JNI_eend)
+                {
+                    /* Don't allow JNI to catch thread death
+                     * exceptions.  Might be bad but its going
+                     * 1.2 anyway.
+                     */
+                    if (strcmp(cname, THREADDEATHCLASS) != 0) {
+                        Kaffe_JNIExceptionHandler();
+                    }
+                }
+
+                /* Find the sync. object */
+                if( einfo.method == 0 ||
+                    (einfo.method->accflags & ACC_SYNCHRONISED) == 0) {
+                    obj = 0;
+                }
+                else if (einfo.method->accflags & ACC_STATIC) {
+                    obj = &einfo.class->head;
+                }
+                else {
+                    obj = FRAMEOBJECT(e);
+                }
+
+                /* Handler found - dispatch exception */
+                if (einfo.handler != 0) {
+                    unhand(ct)->exceptObj = 0;
+                    CALL_KAFFE_EXCEPTION(e, einfo, eobj);
+                }
+
+                /* If method found and synchronised, unlock the lock */
+                lk = getLock(obj);
+                if( lk != 0 &&
+                    lk->holder == (*Kaffe_ThreadInterface.currentNative)()) {
+                    unlockMutex(obj);
+                }
+            }
 		}
 	}
     else
