@@ -8,8 +8,8 @@
  * of this file. 
  */
 
-#ifndef __slots_h
-#define __slots_h
+#ifndef __slots_jit_h
+#define __slots_jit_h
 
 #define	Tcomplex		0
 #define	Tnull			Tcomplex

@@ -7,8 +7,8 @@
  * of this file. 
  */
 
-#ifndef __machine_h
-#define __machine_h
+#ifndef __machine_jit_h
+#define __machine_jit_h
 
 /* -------------------------------------------------------------------- */
 
