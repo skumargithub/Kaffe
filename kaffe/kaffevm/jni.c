@@ -120,10 +120,10 @@ extern JavaVM Kaffe_JavaVM;
 extern struct JNIEnv_ Kaffe_JNIEnv;
 
 static void Kaffe_JNI_wrapper(Method*, void*);
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 static void startJNIcall(void);
 static void finishJNIcall(void);
-#endif
+/* #endif */
 
 void Kaffe_JNIExceptionHandler(void);
 jint Kaffe_GetVersion(JNIEnv*);
@@ -3697,7 +3697,7 @@ Kaffe_JNI_wrapper(Method* xmeth, void* func)
 }
 #endif /* INTERPRETER */
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 static
 void
 startJNIcall(void)
@@ -3736,7 +3736,7 @@ finishJNIcall(void)
 		throwExternalException(eobj);
 	}
 }
-#endif /* TRANSLATOR */
+/* #endif */ /* TRANSLATOR */
 
 #if defined(NEED_JNIREFS)
 static
