@@ -102,6 +102,96 @@ do {								\
 } while (0)
 
 void
+intrp_to_jit(Method* meth, jvalue* args, jvalue* R, callMethodInfo *call)
+{
+	char* sig = meth->signature->data;
+	int i = 0;
+	int s = 0;
+	jvalue *in = call->args;
+
+	/* If this method isn't static, we must insert the object as
+	 * an argument.
+ 	 */
+	if ((meth->accflags & ACC_STATIC) == 0) {
+		call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
+		s += call->callsize[i];
+		call->calltype[i] = 'L';
+		in[i] = args[i];
+		i++;
+	}
+
+	sig++;	/* Skip leading '(' */
+	for (; *sig != ')'; i++, sig++) {
+		call->calltype[i] = *sig;
+		switch (*sig) {
+		case 'I':
+		case 'Z':
+		case 'S':
+		case 'B':
+		case 'C':
+		case 'F':
+			call->callsize[i] = 1;
+			in[i] = args[i];
+			break;
+
+		case 'D':
+		case 'J':
+			call->callsize[i] = 2;
+			in[i] = args[i];
+			i++;
+			call->callsize[i] = 0;
+			break;
+
+		case '[':
+			call->calltype[i] = 'L';	/* Looks like an object */
+			call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
+			in[i] = args[i];
+			while (*sig == '[') {
+				sig++;
+			}
+			if (*sig == 'L') {
+				while (*sig != ';') {
+					sig++;
+				}
+			}
+			break;
+		case 'L':
+			call->callsize[i] = PTR_TYPE_SIZE / SIZEOF_INT;
+			in[i] = args[i];
+			while (*sig != ';') {
+				sig++;
+			}
+			break;
+		default:
+			ABORT();
+		}
+		s += call->callsize[i];
+	}
+	sig++;	/* Skip trailing ')' */
+
+	/* Return info */
+	call->rettype = *sig;
+	if (*sig == 'L' || *sig == '[') {
+		call->retsize = PTR_TYPE_SIZE / SIZEOF_INT;
+	}
+	else if (*sig == 'V') {
+		call->retsize = 0;
+	}
+	else if (*sig == 'D' || *sig == 'J') {
+		call->retsize = 2;
+	}
+	else {
+		call->retsize = 1;
+	}
+
+	/* Call info and arguments */
+	call->nrargs = i;
+	call->argsize = s;
+	call->ret = R;
+	call->function = meth->ncode;
+}
+
+void
 virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thread* tid)
 {
 	Hjava_lang_Object* volatile mobj;
