@@ -187,13 +187,13 @@ void dbgSetMaskStr(char *mask_str)
 	}
 
 	if (kaffevmDebugMask & DBG_JIT) {
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 		extern int jit_debug;
 		jit_debug = 1;
-#else
-		fprintf(stderr, 
-			"You cannot debug the JIT in interpreter mode \n");
-#endif
+/* #else */
+		/* fprintf(stderr,  */
+			/* "You cannot debug the JIT in interpreter mode \n"); */
+/* #endif */
 	}
 }
 
@@ -230,11 +230,11 @@ debugExitHook(void)
 static void
 debugSysInit(void)
 {
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 	extern int jit_debug;
 	if (getenv("JIT_DEBUG")) 
 		jit_debug = 1;
-#endif
+/* #endif */
 	atexit(debugExitHook);
 }
 
