@@ -1403,7 +1403,7 @@ printMethodStats(void)
             /*
              * Pure JIT
              */
-            fileName = "stat.d";
+            fileName = "stat.a";
         break;
         
         case 30:
@@ -1446,9 +1446,9 @@ printMethodStats(void)
 
                         fprintf(fp,
                                 "%s.%s%s\n"
-                                "I=%4d, "
-                                "B=%4d, Br=%3d, X=%2d, S=%2d, E=%2d, "
-                                "V=%7llu, T=%7llu\n",
+                                "I= %4d, "
+                                "B= %4d, Br= %3d, X= %2d, S= %2d, E= %2d, "
+                                "V= %8llu, T= %8llu\n",
                                 ptr->class->name->data,
                                 ptr->name->data,
                                 ptr->signature->data,
