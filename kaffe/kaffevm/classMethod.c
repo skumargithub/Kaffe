@@ -329,6 +329,49 @@ internalSetupClass(Hjava_lang_Class* cl, Utf8Const* name, int flags, int su, Hja
 	cl->loader = loader;
 }
 
+static char *methodNames[50] = {NULL};
+static char *methodSigs[50] = {NULL};
+static int numMethods = 0;
+
+void
+readMethodXlt(void)
+{
+    char buffer[80];
+    FILE *fp = fopen("methods.xlt", "r");
+
+    if(fp == NULL)
+    {
+        return;
+    }
+
+    while(fgets(buffer, sizeof buffer, fp) != NULL)
+    {
+        char *s = buffer;
+
+        buffer[strlen(buffer) - 1] = '\0';
+        while(*s != '(')
+        {
+            s++;
+        }
+
+        methodSigs[numMethods] =
+            gc_malloc(strlen(s) + 1, GC_ALLOC_STATICDATA);
+        strcpy(methodSigs[numMethods], s);
+
+        *s = '\0';
+        methodNames[numMethods] =
+            gc_malloc(strlen(buffer) + 1, GC_ALLOC_STATICDATA);
+        strcpy(methodNames[numMethods], buffer);
+
+        fprintf(stderr,
+                "Will interpret \"%s-%s\"\n",
+                methodNames[numMethods],
+                methodSigs[numMethods]);
+
+        numMethods++;
+    }
+}
+
 Method*
 addMethod(Hjava_lang_Class* c, method_info* m)
 {
@@ -403,7 +446,22 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
         break;
 
         case 40:
-            assert(0);
+        {
+            /*
+             * Interpret only the methods the user specifies
+             */
+            int i;
+            for(i = 0; i < numMethods; i++)
+            {
+                if( !strcmp(mt->name->data, methodNames[i]) &&
+                    !strcmp(mt->signature->data, methodSigs[i]))
+                {
+                    mt->accflags |= ACC_TOINTERPRET;
+
+                    break;
+                }
+            }
+        }
         break;
 
         default:

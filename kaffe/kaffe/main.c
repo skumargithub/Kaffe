@@ -199,6 +199,8 @@ handleErrors(void)
 	}
 }
 
+void readMethodXlt(void);
+
 /*
  * Process program's flags.
  */
@@ -327,6 +329,7 @@ options(char** argv)
         else if(strcmp(argv[i], "-mixSomeJIT") == 0)
         {
             vmargs.JITstatus = 40;
+            readMethodXlt();
         }
 		/* The following options are not supported and will be
 		 * ignored for compatibility purposes.
