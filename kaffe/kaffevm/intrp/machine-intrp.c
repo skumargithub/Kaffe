@@ -133,6 +133,12 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 	mjbuf.pc = 0;
 	mjbuf.mobj = mobj;
 	mjbuf.meth = meth;
+
+    mjbuf.retpc = 0;
+    __asm__ __volatile__ ("       \n\
+        movl %%ebp, %0          \n\
+    "   :   "=g" (mjbuf.retbp));
+
 	if (tid != NULL && unhand(tid)->PrivateInfo != 0) {
 		mjbuf.prev = (vmException*)unhand(tid)->exceptPtr;
 		unhand(tid)->exceptPtr = (struct Hkaffe_util_Ptr*)&mjbuf;
