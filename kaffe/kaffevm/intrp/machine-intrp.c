@@ -41,6 +41,7 @@
 #include "checks-intrp.h"
 #include "errors.h"
 #include "md.h"
+#include "trampolines.h"
 
 /*
  * Define information about this engine.
@@ -162,6 +163,102 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 }
 
 void
+callVirtualMachine(slots ret, FIXUP_TRAMPOLINE_DECL, int bogus, ...)
+{
+    Method *meth;
+    char *sig;
+	slots in[MAXMARGS];
+    slots *retval = (slots*) &ret;
+    va_list args;
+    int i;
+
+    FIXUP_TRAMPOLINE_INIT;
+    sig = meth->signature->data;
+    i = 0;
+    va_start(args, bogus);
+
+	if ((meth->accflags & ACC_STATIC) == 0) {
+        in[i].v.taddr = va_arg(args, jref);
+        i++;
+	}
+
+	sig++;	/* Skip leading '(' */
+	for (; *sig != ')'; i++, sig++) {
+		switch (*sig) {
+		case 'I':
+		case 'Z':
+		case 'S':
+		case 'B':
+		case 'C':
+			in[i].v.tint = va_arg(args, jint);
+			break;
+		case 'F':
+			in[i].v.tfloat = va_arg(args, jfloat);
+			break;
+		case 'D':
+			in[i].v.tdouble = va_arg(args, jdouble);
+			i++;
+			break;
+		case 'J':
+			in[i].v.tlong = va_arg(args, jlong);
+			i++;
+			break;
+		case '[':
+			in[i].v.taddr = va_arg(args, jref);
+			while (*sig == '[') {
+				sig++;
+			}
+			if (*sig == 'L') {
+				while (*sig != ';') {
+					sig++;
+				}
+			}
+			break;
+		case 'L':
+			in[i].v.taddr = va_arg(args, jref);
+			while (*sig != ';') {
+				sig++;
+			}
+			break;
+		default:
+			ABORT();
+		}
+	}
+    va_end(args);
+
+    virtualMachine( meth, in, retval,
+                    Kaffe_ThreadInterface.currentJava());
+
+    sig++;
+    switch(*sig)
+    {
+        case 'F':
+        {
+            __asm__ __volatile__ ("         \n\
+                flds %0                      \n\
+            "   :                           \
+                :   "m" (retval->v.tfloat));
+        }
+        break;
+
+        case 'D':
+        {
+            __asm__ __volatile__ ("         \n\
+                fldl %0                      \n\
+            "   :                           \
+                :   "m" (retval->v.tdouble));
+        }
+        break;
+    }
+}
+
+static bool
+methodCanBeTranslated(Method *meth)
+{
+    return true;
+}
+
+void
 virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thread* tid)
 {
 	Hjava_lang_Object* volatile mobj;
@@ -196,6 +293,11 @@ virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thr
 	Hjava_lang_Class* crinfo;
 
     callMethodInfo cM;
+
+    if(Kaffe_JavaVMArgs[0].JITstatus == 30 && methodCanBeTranslated(meth))
+    {
+        meth->accflags ^= ACC_TOINTERPRET;
+    }
 
 CDBG(	dprintf("Call: %s.%s%s.\n", meth->class->name->data, meth->name->data, meth->signature->data); )
 

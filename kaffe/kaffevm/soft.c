@@ -468,6 +468,8 @@ soft_initialise_class(Hjava_lang_Class* c)
 	}
 }
 
+void callVirtualMachine(slots, FIXUP_TRAMPOLINE_DECL, int bogus, ...);
+
 /* #if defined(__TRANSLATOR__) */
 /*
  * Trampolines come in here - do the translation and replace the trampoline.
@@ -483,20 +485,35 @@ soft_fixup_trampoline(uintp flagValue, uintp jmpValue, FIXUP_TRAMPOLINE_DECL)
 	/* If this class needs initializing, do it now.  */
 	processClass(meth->class, CSTATE_OK);
 
-	/* Generate code on demand.  */
-	if (!METHOD_TRANSLATED(meth)) {
-		translate(meth);
-	}
+    if(!(meth->accflags & ACC_TOINTERPRET))
+    {
+        /* Generate code on demand.  */
+        if (!METHOD_TRANSLATED(meth)) {
+            translate(meth);
 
-	/* Update dispatch table */
-	if (meth->idx >= 0) {
-		meth->class->dtable->method[meth->idx] = METHOD_NATIVECODE(meth);
-	}
+            /* Update dispatch table */
+            if (meth->idx >= 0) {
+                meth->class->dtable->method[meth->idx] = meth->ncode;
+            }
+
+#if 0
+            fprintf(stderr, "Translating %s.%s%s\n",
+                    meth->class->name->data,
+                    meth->name->data,
+                    meth->signature->data);
+#endif
+        }
 
 TDBG(	fprintf(stderr, "Calling %s:%s%s @ 0x%x\n", meth->class->name->data, meth->name->data, meth->signature->data, METHOD_NATIVECODE(meth));	)
 
-	*jmpAddress = (uintp) METHOD_NATIVECODE(meth);
-    *flagAddress = 1;
+        *jmpAddress = (uintp) METHOD_NATIVECODE(meth);
+        *flagAddress = 1;
+    }
+    else
+    {
+        *jmpAddress = (uintp) &callVirtualMachine;
+        *flagAddress = 0;
+    }
 }
 /* #endif */
 

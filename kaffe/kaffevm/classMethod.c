@@ -335,7 +335,7 @@ static char *methodNames[50] = {NULL};
 static char *methodSigs[50] = {NULL};
 static int numMethods = 0;
 
-void
+static void
 readMethodXlt(void)
 {
     char buffer[80];
@@ -349,6 +349,11 @@ readMethodXlt(void)
     while(fgets(buffer, sizeof buffer, fp) != NULL)
     {
         char *s = buffer;
+
+        if(*s == '#')
+        {
+            continue;
+        }
 
         buffer[strlen(buffer) - 1] = '\0';
         while(*s != '(')
@@ -446,7 +451,11 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
         break;
         
         case 30:
-            assert(0);
+            /*
+             * Mix JIT on internal heuristic, we start with the
+             * interpreter flag set for all methods
+             */
+            mt->accflags |= ACC_TOINTERPRET;
         break;
 
         case 40:
@@ -454,13 +463,28 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
             /*
              * Interpret only the methods the user specifies
              */
+            static int firstTime = 0;
             int i;
+
+            if(firstTime == 0)
+            {
+                firstTime = 1;
+                readMethodXlt();
+            }
+
             for(i = 0; i < numMethods; i++)
             {
                 if( !strcmp(mt->name->data, methodNames[i]) &&
                     !strcmp(mt->signature->data, methodSigs[i]))
                 {
                     mt->accflags |= ACC_TOINTERPRET;
+#if 0
+                    fprintf(stderr,
+                            "Mark interpret \"%s.%s%s\"\n",
+                            mt->class->name->data,
+                            methodNames[i],
+                            methodSigs[i]);
+#endif
 
                     break;
                 }
