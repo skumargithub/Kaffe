@@ -77,6 +77,10 @@ static void removeJNIref(jref);
 	vmException ebuf;				\
 	ebuf.prev = (vmException*)unhand(getCurrentThread())->exceptPtr;\
 	ebuf.meth = (Method*)1;				\
+    ebuf.retpc = 0;                     \
+    __asm__ __volatile__ ("       \n\
+        movl %%ebp, %0          \n\
+    "   :   "=g" (ebuf.retbp));            \
 	if (setjmp(ebuf.jbuf) != 0) {			\
 		unhand(getCurrentThread())->exceptPtr = \
 		  (struct Hkaffe_util_Ptr*)ebuf.prev;	\
@@ -88,6 +92,10 @@ static void removeJNIref(jref);
 	vmException ebuf;				\
 	ebuf.prev = (vmException*)unhand(getCurrentThread())->exceptPtr;\
 	ebuf.meth = (Method*)1;				\
+    ebuf.retpc = 0;                     \
+    __asm__ __volatile__ ("       \n\
+        movl %%ebp, %0          \n\
+    "   :   "=g" (ebuf.retbp));            \
 	if (setjmp(ebuf.jbuf) != 0) {			\
 		unhand(getCurrentThread())->exceptPtr = \
 		  (struct Hkaffe_util_Ptr*)ebuf.prev;	\
