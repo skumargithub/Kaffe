@@ -354,14 +354,13 @@ readMethodXlt(void)
             s++;
         }
 
-        methodSigs[numMethods] =
-            gc_malloc(strlen(s) + 1, GC_ALLOC_STATICDATA);
-        strcpy(methodSigs[numMethods], s);
+        /*
+         * Surely, using strdup is wrong
+         */
+        methodSigs[numMethods] = strdup(s);
 
         *s = '\0';
-        methodNames[numMethods] =
-            gc_malloc(strlen(buffer) + 1, GC_ALLOC_STATICDATA);
-        strcpy(methodNames[numMethods], buffer);
+        methodNames[numMethods] = strdup(buffer);
 
         fprintf(stderr,
                 "Will interpret \"%s-%s\"\n",
