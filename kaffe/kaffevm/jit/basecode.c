@@ -8,12 +8,6 @@
  * of this file. 
  */
 
-#ifndef TRANSLATOR
-#define TRANSLATOR
-#endif
-
-#undef INTERPRETER
-
 #include "config.h"
 #include "config-std.h"
 #include "gtypes.h"

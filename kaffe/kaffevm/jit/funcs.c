@@ -7,12 +7,6 @@
  * of this file. 
  */
 
-#ifndef TRANSLATOR
-#define TRANSLATOR
-#endif
-
-#undef INTERPRETER
-
 #include "config.h"
 #include "debug.h"
 #include "config-std.h"

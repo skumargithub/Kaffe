@@ -7,13 +7,6 @@
  * See the file "license.terms" for information on usage and redistribution 
  * of this file. 
  */
-
-#ifndef TRANSLATOR
-#define TRANSLATOR
-#endif
-
-#undef INTERPRETER
-
 #include "config.h"
 #include "config-std.h"
 #include "config-mem.h"
