@@ -116,32 +116,6 @@
 #define cbranch_ref_const_eq(s1, s2, w)		if ((s1)[0].v.taddr == (void*)(s2)) w
 #define cbranch_ref_const_ne(s1, s2, w)		if ((s1)[0].v.taddr != (void*)(s2)) w
 
-#define	call(m) \
-do {    \
-    softcall_initialise_class(method_class());  \
-    if((m)->accflags & ACC_TOINTERPRET) \
-    {   \
-        virtualMachine((m), sp+1, retval, tid); \
-    }   \
-    else    \
-    {   \
-        assert(0);  \
-    }   \
-} while(0)
-
-#define	call_indirect_method(m) \
-do { \
-    softcall_initialise_class(method_class()); \
-    if(m->accflags & ACC_TOINTERPRET)   \
-    {   \
-        virtualMachine(m, sp+1, retval, tid); \
-    }   \
-    else    \
-    {   \
-        assert(0);  \
-    }   \
-} while(0)
-
 #define	ret()					goto end
 
 #define	returnarg_int(s)			retval[0].v.tint = (s)[0].v.tint
