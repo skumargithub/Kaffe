@@ -449,6 +449,7 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
             /*
              * Apply internal heuristic for JIT compilation
              */
+            mt->accflags |= ACC_TOINTERPRET;
         break;
 
         case 40:
