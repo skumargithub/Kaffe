@@ -66,8 +66,6 @@ external_wrappers.h:	$(SOURCES)
 
 clean:
 		rm -f $(LIB) $(OBJECT) lib.exp external_wrappers.h
-		rm -f $(DEPENDS) .depend 
-		touch .depend
 
 distclean:	clean
 		rm -f Makefile .depend

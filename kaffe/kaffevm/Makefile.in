@@ -112,9 +112,6 @@ machine-intrp.o:
 
 clean:
 		rm -f $(LIB) $(LLIB) $(OBJECT) lib.exp
-		rm -f $(DEPENDS)
-		rm -f .depend
-		touch .depend
 
 distclean:	clean
 		rm -f md.c jit.def jit/icode-jit.h trampolines.c trampolines.h
