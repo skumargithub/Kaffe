@@ -96,12 +96,6 @@ typedef struct Hjava_lang_Class Hjava_lang_Class;
 #define	SET_METHOD_NATIVECODE(M, C)	(M)->ncode = (C); \
 					(M)->accflags |= ACC_TRANSLATED
 
-#if defined(TRANSLATOR)
-#define	METHOD_INDIRECTMETHOD(M)	METHOD_NATIVECODE(M)
-#else
-#define	METHOD_INDIRECTMETHOD(M)	(M)
-#endif
-
 /*
  * Class hash entry.
  */

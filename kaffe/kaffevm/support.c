@@ -79,7 +79,7 @@ do_execute_java_method_v(void* obj, char* method_name, char* signature, Method* 
 		throwException(NoSuchMethodError(method_name));
 	}
 
-	callMethodV(mb, METHOD_INDIRECTMETHOD(mb), obj, argptr, &retval);
+	callMethodV(mb, mb, obj, argptr, &retval);
 
 	return (retval);
 }
@@ -118,7 +118,7 @@ do_execute_java_class_method_v(char* cname, char* method_name, char* signature, 
 	}
 
 	/* Make the call */
-	callMethodV(mb, METHOD_INDIRECTMETHOD(mb), 0, argptr, &retval);
+	callMethodV(mb, mb, 0, argptr, &retval);
 
 	return (retval);
 }
@@ -173,7 +173,7 @@ execute_java_constructor_v(char* cname, Hjava_lang_Class* cc, char* signature, v
 	assert(obj != 0);
 
 	/* Make the call */
-	callMethodV(mb, METHOD_INDIRECTMETHOD(mb), obj, argptr, &retval);
+	callMethodV(mb, mb, obj, argptr, &retval);
 
 	return (obj);
 }
@@ -222,7 +222,6 @@ if(meth->accflags & ACC_TOINTERPRET)
 	 * upon return from native and we will add additional parameters 
 	 * according to the JNI calling convention.
 	 */
-	meth = (Method*)func;
 	if (meth->accflags & ACC_NATIVE) {
 		if (METHOD_NATIVECODE(meth) == 0) {
 			native(meth);
@@ -337,7 +336,7 @@ if(meth->accflags & ACC_TOINTERPRET)
 /* #if defined(__TRANSLATOR__) */
 if(!(meth->accflags & ACC_TOINTERPRET))
 {
-	call.function = func;
+	call.function = meth->ncode;
 	/* Make the call - system dependent */
 	sysdepCallMethod(&call);
 }
@@ -400,7 +399,6 @@ callMethodV(Method* meth, void* func, void* obj, va_list args, jvalue* ret)
 /* #if defined(__INTERPRETER__) */
 if(meth->accflags & ACC_TOINTERPRET)
 {
-	meth = (Method*)func;
 	if (meth->accflags & ACC_NATIVE) {
                 if (METHOD_NATIVECODE(meth) == 0) {
                         native(meth);
@@ -522,7 +520,7 @@ if(meth->accflags & ACC_TOINTERPRET)
 /* #if defined(__TRANSLATOR__) */
 if(!(meth->accflags & ACC_TOINTERPRET))
 {
-	call.function = func;
+	call.function = meth->ncode;
 	/* Make the call - system dependent */
 	sysdepCallMethod(&call);
 }
