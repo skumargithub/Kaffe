@@ -38,12 +38,12 @@
 #include "exception.h"
 #if defined(TRANSLATOR)
 #include "seq.h"
-#include "slots.h"
+#include "slots-jit.h"
 #include "labels.h"
 #include "codeproto.h"
 #include "basecode.h"
-#include "icode.h"
-#include "machine.h"
+/* #include "icode.h" */
+/* #include "machine.h" */
 extern int maxArgs;
 extern int isStatic;
 extern int maxTemp;
