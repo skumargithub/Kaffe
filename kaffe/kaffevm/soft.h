@@ -48,7 +48,7 @@ void*	soft_multianewarray_intrp(struct Hjava_lang_Class*, jint, slots*);
 void*	soft_multianewarray_jit(struct Hjava_lang_Class*, jint, ...);
 /* #endif */
 
-#if defined(TRANSLATOR)
+/* #if defined(__TRANSLATOR__) */
 jlong	soft_lmul(jlong, jlong);
 jlong	soft_ldiv(jlong, jlong);
 jlong	soft_lrem(jlong, jlong);
@@ -60,7 +60,7 @@ jlong	soft_lshll(jlong, jint);
 jlong	soft_ashrl(jlong, jint);
 jlong	soft_lshrl(jlong, jint);
 jint	soft_lcmp(jlong, jlong);
-#endif
+/* #endif */
 
 jlong	soft_cvtil(jint);
 jfloat	soft_cvtif(jint);
