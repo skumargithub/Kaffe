@@ -382,6 +382,34 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
 		mt->accflags |= ACC_CONSTRUCTOR;
 	}
 
+    switch(Kaffe_JavaVMArgs[0].JITstatus)
+    {
+        case 10:
+            /*
+             * Pure interpreter
+             */
+            mt->accflags |= ACC_TOINTERPRET;
+        break;
+
+        case 20:
+            /*
+             * Pure JIT
+             */
+        break;
+        
+        case 30:
+            assert(0);
+        break;
+
+        case 40:
+            assert(0);
+        break;
+
+        default:
+            assert(0);
+        break;
+    }
+
 	return (mt);
 }
 
