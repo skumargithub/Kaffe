@@ -101,32 +101,6 @@ do {								\
 	}							\
 } while (0)
 
-#define	call(m) \
-do {    \
-    softcall_initialise_class(method_class());  \
-    if((m)->accflags & ACC_TOINTERPRET) \
-    {   \
-        virtualMachine((m), sp+1, retval, tid); \
-    }   \
-    else    \
-    {   \
-        assert(0);  \
-    }   \
-} while(0)
-
-#define	call_indirect_method(m) \
-do { \
-    softcall_initialise_class(method_class()); \
-    if(m->accflags & ACC_TOINTERPRET)   \
-    {   \
-        virtualMachine(m, sp+1, retval, tid); \
-    }   \
-    else    \
-    {   \
-        assert(0);  \
-    }   \
-} while(0)
-
 void
 virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thread* tid)
 {
@@ -295,7 +269,16 @@ case INVOKEVIRTUAL:
 
 		/* Call it */
 		low = method_returntype();
-		call(((Method*) tmp[0].v.taddr));
+        softcall_initialise_class(method_class());
+
+        if(((Method*) tmp[0].v.taddr)->accflags & ACC_TOINTERPRET)
+        {
+            virtualMachine(tmp[0].v.taddr, sp+1, retval, tid);
+        }
+        else
+        {
+            assert(0);
+        }
 
 		/* Pop args */
 		popargs();
@@ -343,7 +326,16 @@ case INVOKESPECIAL:
 		/* Call it */
 		low = method_returntype();
 
-		call_indirect_method(method_method());
+        softcall_initialise_class(method_class());
+
+        if(cinfo.method->accflags & ACC_TOINTERPRET)
+        {
+            virtualMachine(cinfo.method, sp+1, retval, tid);
+        }
+        else
+        {
+            assert(0);
+        }
 
 		/* Pop args */
 		popargs();
@@ -383,8 +375,16 @@ case INVOKESTATIC:
 
 		/* Call it */
 		low = method_returntype();
+        softcall_initialise_class(method_class());
 
-		call_indirect_method(method_method());
+        if(cinfo.method->accflags & ACC_TOINTERPRET)
+        {
+            virtualMachine(cinfo.method, sp+1, retval, tid);
+        }
+        else
+        {
+            assert(0);
+        }
 
 		/* Pop args */
 		popargs();
@@ -435,7 +435,16 @@ case INVOKEINTERFACE:
 
 		/* Call it */
 		low = method_returntype();
-		call(((Method*) tmp[0].v.taddr));
+        softcall_initialise_class(method_class());
+
+        if(((Method*) tmp[0].v.taddr)->accflags & ACC_TOINTERPRET)
+        {
+            virtualMachine(tmp[0].v.taddr, sp+1, retval, tid);
+        }
+        else
+        {
+            assert(0);
+        }
 
 		/* Pop args */
 		popargs();
