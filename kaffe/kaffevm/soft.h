@@ -22,7 +22,8 @@ void*	soft_anewarray(struct Hjava_lang_Class*, jint);
 void	soft_initialise_class(struct Hjava_lang_Class*);
 nativecode* soft_get_method_code (Method*);
 
-void*	soft_lookupmethod(struct Hjava_lang_Object*, Utf8Const*, Utf8Const*);
+void*	soft_lookupmethod_jit(struct Hjava_lang_Object*, Utf8Const*, Utf8Const*);
+void*	soft_lookupmethod_intrp(struct Hjava_lang_Object*, Utf8Const*, Utf8Const*);
 void*	soft_checkcast(struct Hjava_lang_Class*, struct Hjava_lang_Object*);
 jint	soft_instanceof(struct Hjava_lang_Class*, struct Hjava_lang_Object*);
 
@@ -42,9 +43,10 @@ jint	soft_mul(jint, jint);
 jint	soft_div(jint, jint);
 jint	soft_rem(jint, jint);
 
-#if defined(INTERPRETER)
-void*	soft_multianewarray(struct Hjava_lang_Class*, jint, slots*);
-#endif
+/* #if defined(__INTERPRETER__) */
+void*	soft_multianewarray_intrp(struct Hjava_lang_Class*, jint, slots*);
+void*	soft_multianewarray_jit(struct Hjava_lang_Class*, jint, ...);
+/* #endif */
 
 #if defined(TRANSLATOR)
 jlong	soft_lmul(jlong, jlong);
@@ -58,7 +60,6 @@ jlong	soft_lshll(jlong, jint);
 jlong	soft_ashrl(jlong, jint);
 jlong	soft_lshrl(jlong, jint);
 jint	soft_lcmp(jlong, jlong);
-void*	soft_multianewarray(struct Hjava_lang_Class*, jint, ...);
 #endif
 
 jlong	soft_cvtil(jint);
