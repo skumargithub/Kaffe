@@ -8,8 +8,8 @@
  * of this file. 
  */
 
-#ifndef __slots_h
-#define	__slots_h
+#ifndef __slots_intrp_h
+#define	__slots_intrp_h
 
 #define	push(N)			sp += (N)
 #define	pop(N)			sp -= (N)

@@ -8,8 +8,8 @@
  * of this file. 
  */
 
-#ifndef __machine_h
-#define	__machine_h
+#ifndef __machine_intrp_h
+#define	__machine_intrp_h
 
 #define current_class()		(meth->class)
 
