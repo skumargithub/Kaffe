@@ -8,7 +8,9 @@
  * See the file "license.terms" for information on usage and redistribution 
  * of this file. 
  */
+#ifndef INTERPRETER
 #define INTERPRETER
+#endif
 
 #include "debug.h"
 #define	CDBG(s) 	DBG(INT_VMCALL, s)
@@ -25,8 +27,8 @@
 #include "classMethod.h"
 #include "gtypes.h"
 #include "bytecode.h"
-#include "slots.h"
-#include "icode.h"
+#include "slots-intrp.h"
+#include "icode-intrp.h"
 #include "access.h"
 #include "object.h"
 #include "constants.h"
