@@ -9,6 +9,9 @@ Tests that the intrp fails
     ThreadLocalTest
 }
 
+ProcessTest works for both cases now?? I think the stuff
+that somehow triggered was the METHOD_INDIRECT and associated macro
+
 There might be some problem with soft_lookup_method
 In the case of JIT it returns meth->ncode
 In the case of INT it returns meth
