@@ -78,4 +78,18 @@ jint instanceof(struct Hjava_lang_Class*, struct Hjava_lang_Class*);
 jint instanceof_class(struct Hjava_lang_Class*, struct Hjava_lang_Class*);
 jint instanceof_array(struct Hjava_lang_Class*, struct Hjava_lang_Class*);
 
+struct _methods;
+void translate(struct _methods*);
+
+typedef struct _nativeCodeInfo {
+	void*	mem;
+	int	memlen;
+	void*	code;
+	int	codelen;
+} nativeCodeInfo;
+
+void initInsnSequence(int, int, int);
+void finishInsnSequence(nativeCodeInfo*);
+void installMethodCode(Method*, nativeCodeInfo*);
+
 #endif
