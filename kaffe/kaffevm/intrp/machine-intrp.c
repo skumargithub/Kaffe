@@ -299,6 +299,8 @@ virtualMachine(methods* meth, slots* volatile arg, slots* retval, Hjava_lang_Thr
         meth->accflags ^= ACC_TOINTERPRET;
     }
 
+    meth->stats.intrpInvokeCount++;
+
 CDBG(	dprintf("Call: %s.%s%s.\n", meth->class->name->data, meth->name->data, meth->signature->data); )
 
 	/* If this is native, then call the real function */
@@ -316,8 +318,10 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 
 	/* Verify method if required */
 	if ((methaccflags & ACC_VERIFIED) == 0) {
+        BEGIN_TIMER();
 		verifyMethod(meth);
 		tidyVerifyMethod();
+        END_TIMER(meth->stats.timeVerify);
 	}
 
 	/* Allocate stack space and locals. */

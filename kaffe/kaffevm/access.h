@@ -32,4 +32,6 @@
 #define	ACC_TRANSLATED		0x4000
 #define	ACC_VERIFIED		0x8000
 
+#define	METH_ISLEAF     0x0001
+
 #endif

@@ -319,6 +319,7 @@ struct JavaVMInitArgs {
      * 30 = Mix it up
      */
 	jint		JITstatus;
+	jint		printStat;
 
 	const char*	classhome;
 	const char*	librarypath;

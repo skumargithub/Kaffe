@@ -4123,6 +4123,7 @@ JavaVMInitArgs Kaffe_JavaVMInitArgs = {
 	0,		/* Enable verbose JIT */
 	ALLOC_HEAPSIZE,	/* Inc heap size */
     20,             /* By default JIT the whole thing */
+    0,             /* By default no stat info */
 	0,		/* Class home */
 	0,		/* Library home */
 };

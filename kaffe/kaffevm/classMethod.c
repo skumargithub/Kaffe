@@ -429,6 +429,12 @@ MDBG(	printf("Adding method %s:%s%s (%x)\n", c->name->data, WORD2UTF(pool->data[
 	mt->exception_table = 0;
 	mt->Jexception_table = 0;
 	mt->idx = -1;
+    mt->stats.intrpInvokeCount = 0;
+    mt->stats.numByteCode = 0;
+    mt->stats.numBranch = 0;
+    mt->stats.numSwitch = 0;
+    mt->stats.numExit = 0;
+    mt->stats.timeTranslate = 0;
 
 	/* Mark constructors as such */
 	if (equalUtf8Consts (name, constructor_name)) {
@@ -1372,3 +1378,56 @@ findMethodFromPC(uintp pc)
 	return (NULL);
 }
 /* #endif */
+
+void
+printMethodStats(void)
+{
+	classEntry* entry;
+	Method* ptr;
+    struct _jexception* ex;
+	int ipool;
+	int imeth;
+
+    fprintf(stderr, "In printMethodStats()\n");
+
+	for (ipool = CLASSHASHSZ;  --ipool >= 0; )
+    {
+		for (entry = classEntryPool[ipool];  entry != NULL;
+            entry = entry->next)
+        {
+			if (entry->class != 0)
+            {
+				imeth = CLASS_NMETHODS(entry->class);
+				ptr = CLASS_METHODS(entry->class);
+				for (; --imeth >= 0;  ptr++)
+                {
+                    if(ptr->stats.intrpInvokeCount != 0)
+                    {
+                        ex = ptr->exception_table;
+
+                        fprintf(stderr,
+#if 0
+                                "%s.%s%s "
+#endif
+                                "I=%4d, "
+                                "B=%4d, Br=%3d, X=%2d, S=%2d, E=%2d, "
+                                "V=%7llu, T=%7llu\n",
+#if 0
+                                ptr->class->name->data,
+                                ptr->name->data,
+                                ptr->signature->data,
+#endif
+                                ptr->stats.intrpInvokeCount,
+                                ptr->stats.numByteCode,
+                                ptr->stats.numBranch,
+                                ex ? ex->length : 0,
+                                ptr->stats.numSwitch,
+                                ptr->stats.numExit,
+                                ptr->stats.timeVerify,
+                                ptr->stats.timeTranslate);
+                    }
+				}
+			}
+		}
+	}
+}

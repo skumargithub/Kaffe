@@ -107,6 +107,18 @@ typedef struct _classEntry {
 	struct _classEntry*	next;
 } classEntry;
 
+typedef struct _statInfo
+{
+    int intrpInvokeCount;
+    int numByteCode;
+    int numBranch;
+    int numSwitch;
+    int numExit;
+    unsigned long long timeVerify;
+    unsigned long long timeTranslate;
+    u2  flags;
+} statInfo;
+
 typedef struct _methods {
 	Utf8Const*		name;
 	Utf8Const*		signature;
@@ -114,6 +126,7 @@ typedef struct _methods {
 	short			idx;	/* Index into class->dtable */
 	u2			stacksz;
 	u2			localsz;
+    statInfo    stats;
 	nativecode*		ncode;	/* Must be here for trampolines */
 	union {
 	  struct {

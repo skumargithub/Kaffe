@@ -134,6 +134,8 @@ main(int argc, char* argv[])
  * Does anybody have a better solution?
  */
 
+void printMethodStats(void);
+
 /*
  * MAIN, part II
  */
@@ -184,7 +186,15 @@ main2(JNIEnv* env, char *argv[], int farg, int argc)
 	(*env)->CallStaticVoidMethod(env, mcls, mmth, args);
 	handleErrors();
 
+#if 0
+    if(Kaffe_JavaVMArgs[0].printStat)
+    {
+        printMethodStats();
+    }
+#endif
+
 	(*vm)->DetachCurrentThread(vm);
+
 	return (0);
 }
 
@@ -328,6 +338,11 @@ options(char** argv)
         {
             vmargs.JITstatus = 40;
         }
+        else if(strcmp(argv[i], "-stat") == 0)
+        {
+            vmargs.printStat = 1;
+            atexit(printMethodStats);
+        }
 		/* The following options are not supported and will be
 		 * ignored for compatibility purposes.
 		 */
@@ -371,6 +386,7 @@ usage(void)
 	fprintf(stderr, "	-disableJIT     Disable JIT\n");
 	fprintf(stderr, "	-mixJIT         Mix JIT and interpreter\n");
 	fprintf(stderr, "	-mixSomeJIT     Interpret methods in methods.xlt\n");
+	fprintf(stderr, "	-stat           Give stat on methods\n");
 	fprintf(stderr, "	-verbosegc		Print message during garbage collection\n");
 	fprintf(stderr, "	-v, -verbose		Be verbose\n");
 	fprintf(stderr, "	-verbosejit		Print message during JIT code generation\n");

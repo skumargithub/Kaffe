@@ -141,6 +141,8 @@ translate(Method* meth)
 
 	int64 tms = 0;
 	int64 tme;
+    unsigned long long verify1;
+    unsigned long long verify2;
 
 	static iLock translatorlock;
 	static bool init = false;
@@ -197,12 +199,15 @@ DBG(MOREJIT,
 	len = meth->c.bcode.codelen;
 
 	/* Scan the code and determine the basic blocks */
+    BEGIN_TIMER();
 	verifyMethod(meth);
+    END_TIMER(verify1);
 
 	/***************************************/
 	/* Next reduce bytecode to native code */
 	/***************************************/
 
+    BEGIN_TIMER();
 	initInsnSequence(codeperbytecode * len, meth->localsz, meth->stacksz);
 
 	start_basic_block();
@@ -264,8 +269,13 @@ DBG(JIT,	dprintf("pc = %d, npc = %d\n", pc, npc);	)
 
 	finishInsnSequence(&ncode);
 	installMethodCode(meth, &ncode);
+    END_TIMER(meth->stats.timeTranslate);
 
+    BEGIN_TIMER();
 	tidyVerifyMethod();
+    END_TIMER(verify2);
+
+    meth->stats.timeVerify = verify1 + verify2;
 
 DBG(JIT,
 	dprintf("Translated %s.%s%s (%s) %p\n", meth->class->name->data, 
