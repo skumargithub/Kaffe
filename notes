@@ -17,6 +17,12 @@ In the case of JIT it returns meth->ncode
 In the case of INT it returns meth
 What happens when we mix??
 
+JNI stuff
+{
+    It is not very clear what happens when we call native methods
+    from the intrp or the JIT environment
+}
+
 --
 
 Tag info:
