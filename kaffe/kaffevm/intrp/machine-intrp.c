@@ -42,7 +42,7 @@
 #include "baseClasses.h"
 #include "thread.h"
 #include "locks.h"
-#include "checks.h"
+#include "checks-intrp.h"
 #include "errors.h"
 #include "md.h"
 
