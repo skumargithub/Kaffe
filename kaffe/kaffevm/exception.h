@@ -32,6 +32,8 @@ typedef struct _jexception {
 } jexception;
 
 typedef struct _vmException {
+    uintp retbp;
+    uintp retpc;
 	struct _vmException*		prev;
 	jmp_buf				jbuf;
 	struct _methods*		meth;
