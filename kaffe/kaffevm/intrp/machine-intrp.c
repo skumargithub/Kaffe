@@ -41,7 +41,12 @@
 #include "checks-intrp.h"
 #include "errors.h"
 #include "md.h"
-#include "trampolines.h"
+
+/*
+ * Define information about this engine.
+ */
+/* char* engine_name = "Interpreter"; */
+/* char* engine_version = KVER; */
 
 #define	define_insn(code)	break;					\
 				case code:				\
@@ -152,122 +157,8 @@ intrp_to_jit(Method* meth, callMethodInfo *call)
 		}
 	}
 
+	/* Call info and arguments */
 	call->nrargs = i;
-}
-
-/*
- * Heuristics for going from interpreted to JIT come in here
- */
-static bool
-canBeTranslated(Method *meth)
-{
-    if(!strcmp(meth->name->data, "<clinit>"))
-    {
-        /*
-         * No point in JIT <clinit> if it has already been called
-         */
-        return false;
-    }
-    else if(!strcmp(meth->name->data, "main") &&
-            !strcmp(meth->signature->data, "([Ljava/lang/String;)V"))
-    {
-        /*
-         * No point in JIT main if it has already been called
-         */
-        return false;
-    }
-
-    return true;
-}
-
-void
-soft_call_interpreter(long long ret, FIXUP_TRAMPOLINE_DECL, int bogus, ...)
-{
-    Method *meth;
-    char *sig;
-	slots in[MAXMARGS];
-    slots *retval = (slots*) &ret;
-    va_list args;
-    int i;
-
-    FIXUP_TRAMPOLINE_INIT;
-    sig = meth->signature->data;
-    i = 0;
-    va_start(args, bogus);
-
-	if ((meth->accflags & ACC_STATIC) == 0) {
-        in[i].v.taddr = va_arg(args, jref);
-        i++;
-	}
-
-	sig++;	/* Skip leading '(' */
-	for (; *sig != ')'; i++, sig++) {
-		switch (*sig) {
-		case 'I':
-		case 'Z':
-		case 'S':
-		case 'B':
-		case 'C':
-			in[i].v.tint = va_arg(args, jint);
-			break;
-		case 'F':
-			in[i].v.tfloat = va_arg(args, jfloat);
-			break;
-		case 'D':
-			in[i].v.tdouble = va_arg(args, jdouble);
-			i++;
-			break;
-		case 'J':
-			in[i].v.tlong = va_arg(args, jlong);
-			i++;
-			break;
-		case '[':
-			in[i].v.taddr = va_arg(args, jref);
-			while (*sig == '[') {
-				sig++;
-			}
-			if (*sig == 'L') {
-				while (*sig != ';') {
-					sig++;
-				}
-			}
-			break;
-		case 'L':
-			in[i].v.taddr = va_arg(args, jref);
-			while (*sig != ';') {
-				sig++;
-			}
-			break;
-		default:
-			ABORT();
-		}
-	}
-    va_end(args);
-
-    virtualMachine( meth, in, retval,
-                    Kaffe_ThreadInterface.currentJava());
-
-    sig++;
-    switch(*sig)
-    {
-        case 'F':
-        {
-            __asm__ __volatile__ ("         \n\
-                flds %0                      \n\
-            "   :                           \
-                :   "m" (retval->v.tfloat));
-        }
-        break;
-
-        case 'D':
-        {
-            __asm__ __volatile__ ("         \n\
-                fldl %0                      \n\
-            "   :                           \
-                :   "m" (retval->v.tdouble));
-        }
-        break;
-    }
 }
 
 void
@@ -320,21 +211,6 @@ NDBG(		dprintf("Call to native %s.%s%s.\n", meth->class->name->data, meth->name-
 		}
 		return;
 	}
-
-    if(Kaffe_JavaVMArgs[0].JITstatus == 30 && canBeTranslated(meth))
-    {
-        methodTrampoline *tramp = (methodTrampoline*) meth->ncode;
-        FILL_IN_TRAMPOLINE(tramp, meth);
-
-        meth->accflags ^= ACC_TOINTERPRET;
-
-#if 0
-        fprintf(stderr, "%s.%s%s will be JIT on next run\n",
-                        meth->class->name->data,
-                        meth->name->data,
-                        meth->signature->data);
-#endif
-    }
 
 	/* Verify method if required */
 	if ((methaccflags & ACC_VERIFIED) == 0) {
