@@ -99,14 +99,6 @@ typedef struct codeinfo {
 #define	SET_INSNPC(P, V)		codeInfo->perPC[(P)].nativePC = (V)
 #define	INSNPC(P)			codeInfo->perPC[(P)].nativePC
 
-#if 0
-#if defined(__INTERPRETER__)
-#define	SET_INSN(PC, V)			INSN(PC) = (V)
-#else
-#define	SET_INSN(PC, V)
-#endif
-#endif
-
 #define	SET_NORMALFLOW(pc)		FLAGS(pc) |= FLAG_NORMALFLOW
 #define	SET_JUMPFLOW(from, to)		FLAGS(to) |= FLAG_FLOW; \
 					FLAGS(from) |= FLAG_JUMP
