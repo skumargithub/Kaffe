@@ -841,6 +841,8 @@ link_from="$link_from config/$host_cpu/$host_os/jit-md.h"
 link_to="$link_to config/jit-md.h"
 link_from="$link_from config/$host_cpu/trampolines.c"
 link_to="$link_to kaffe/kaffevm/trampolines.c"
+link_from="$link_from config/$host_cpu/trampolines.h"
+link_to="$link_to kaffe/kaffevm/trampolines.h"
 
 
 if test -f $srcdir/config/$host_cpu/$host_os/Make.frag ; then
