@@ -278,6 +278,7 @@ case INVOKEVIRTUAL:
 		METHOD_RETURN_VALUE();
 	}
 }
+break;
 
 case INVOKESPECIAL:
 {
@@ -325,6 +326,7 @@ case INVOKESPECIAL:
 		METHOD_RETURN_VALUE();
 	}
 }
+break;
 
 case INVOKESTATIC:
 {
@@ -365,6 +367,7 @@ case INVOKESTATIC:
 		METHOD_RETURN_VALUE();
 	}
 }
+break;
 
 case INVOKEINTERFACE:
 {
@@ -415,6 +418,7 @@ case INVOKEINTERFACE:
 		METHOD_RETURN_VALUE();
 	}
 }
+break;
 
 		default:
 			fprintf(stderr, "Unknown bytecode %d\n", code[pc]);
