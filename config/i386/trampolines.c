@@ -37,10 +37,20 @@ asm(
 	START_ASM_FUNC() C_FUNC_NAME(i386_do_fixup_trampoline) "\n"
 C_FUNC_NAME(i386_do_fixup_trampoline) ":			\n
     pushl   %eax                                        \n
+    pushl   %ebx                                        \n
 	call	" C_FUNC_NAME(soft_fixup_trampoline) "		\n
+	popl	%ebx						\n
 	popl	%eax						\n
+
+    cmpl    $1,%ebx
+    je      1f
+    call    *%eax
+    popl    %ecx
+    ret
+
+1:
 	popl	%ecx						\n
-	jmp	*%eax"
+	jmp	    *%eax"
 	END_ASM_FUNC()
 );
 

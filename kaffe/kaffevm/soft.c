@@ -473,10 +473,11 @@ soft_initialise_class(Hjava_lang_Class* c)
  * Trampolines come in here - do the translation and replace the trampoline.
  */
 void
-soft_fixup_trampoline(uintp jmpValue, FIXUP_TRAMPOLINE_DECL)
+soft_fixup_trampoline(uintp flagValue, uintp jmpValue, FIXUP_TRAMPOLINE_DECL)
 {
 	Method* meth;
     uintp *jmpAddress = &jmpValue;
+    uintp *flagAddress = &flagValue;
 	FIXUP_TRAMPOLINE_INIT;
 
 	/* If this class needs initializing, do it now.  */
@@ -495,6 +496,7 @@ soft_fixup_trampoline(uintp jmpValue, FIXUP_TRAMPOLINE_DECL)
 TDBG(	fprintf(stderr, "Calling %s:%s%s @ 0x%x\n", meth->class->name->data, meth->name->data, meth->signature->data, METHOD_NATIVECODE(meth));	)
 
 	*jmpAddress = (uintp) METHOD_NATIVECODE(meth);
+    *flagAddress = 1;
 }
 /* #endif */
 
