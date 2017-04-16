@@ -19,6 +19,7 @@ This code is licensed under the GPL.
 I posted the following to the mailing list when I quit working on this extremely interesting and fun project.
 
 -- begin message --
+
 Exceptions are not 100% there. I think this must be some subtle and hard to find bug somewhere in the stuff I have done.
 Only works for i386-Linux and only with static libraries.
 The timing measurements assume a Pentium (I have P-75). Apparently the pentium has two addresses wherein one can get the system clock ticks as a 64 bit thing. I used this to get 9-15 nanosecond accuracy.
@@ -36,4 +37,5 @@ It is my *belief* that this causes performace to degrade. This should be easy to
 The structure of the code needs to be modified with the view of having a mixture. Should make it more efficient. eg. verification etc.
 Perhaps GC could be improved upon.
 As a note to folks who might try to go further than I have gone, getting Kaffe to do mixture is actually quite trivial, provided one has a basic understanding of assembler and how the frame pointer is used etc. I never knew what the %bp was for in a PC. Now I know :-) The other interesting part was the trapoline. Once I figured this out the rest was just routine.
+
 -- end message --
