@@ -1,7 +1,7 @@
 # Kaffe
 
 This is the work I did as part of my Master's program.
-I took the Kaffe JVM (http://kaffe.org/) and combined it's separate JIT and interpreter modes
+I took the Kaffe JVM (https://github.com/kaffe/kaffe) and combined it's separate JIT and interpreter modes
 to opporunistically JIT compile methods based on a heuristic.
 
 I basically checked in kaffe.1.0.b2 into CVS and then made all modifications into that tree.
